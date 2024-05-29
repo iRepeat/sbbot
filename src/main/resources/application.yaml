@@ -8,6 +8,11 @@ spring:
     driver-class-name: org.sqlite.JDBC
     url: "jdbc:sqlite:./sbbot.db"
 
+  ai:
+    openai:
+      api-key: ""
+      base-url: ""
+
 
 server:
   port: 8080
