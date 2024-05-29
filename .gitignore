@@ -34,3 +34,4 @@ build/
 
 ### custom ###
 application-local.yaml
+*.db
