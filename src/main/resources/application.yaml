@@ -2,6 +2,18 @@ spring:
   application:
     name: sbbot
 
+
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.sqlite.JDBC
+    url: "jdbc:sqlite:./sbbot.db"
+
+  ai:
+    openai: # openai配置
+      api-key: "sk-xxx"
+      base-url: "http://xxx.com"
+
+
 server:
   port: 8080
 
@@ -32,8 +44,7 @@ shiro:
     enable: false
     # 补充速率（每秒补充的令牌数量）
     rate: 1
-    # 令牌桶容量
-    capacity: 1
+    # 令牌桶容量    capacity: 1
     # 如果该值为 false 时，当令牌获取失败则会直接丢次本次请求
     # 如果该值为 true 时，当令牌获取失败则会阻塞当前线程，后续任务将被添加到等待队列
     awaitTask: true
@@ -51,3 +62,27 @@ shiro:
     max-pool-size: 30
     # 线程池名前缀
     thread-name-prefix: "ShiroTaskPool-"
+
+  system: # 系统配置。可通过dict表配置
+    super-user:
+      - 123456789
+      - 987654321
+    enable: true
+    ocr:
+      baidu:
+        api-key: xxx
+        app-id: xxx
+        secret-key: xxx
+        accurate: false
+
+  interceptor: com.zh.sbbot.custom.CustomMessageEventInterceptor
+  plugin:
+    ai:
+      qwen: # 通义千问配置。可通过dict表配置
+        api-key: sk-xxx
+
+      qianfan: # 千帆大模型配置。可通过dict表配置
+        access-key: xxx
+        secret-key: xxx
+
+

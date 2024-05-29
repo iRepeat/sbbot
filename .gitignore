@@ -34,3 +34,7 @@ build/
 
 ### custom ###
 application-local.yaml
+*.db
+/tts
+/image
+/src/main/resources/maven.properties
