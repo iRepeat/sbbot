@@ -34,11 +34,12 @@ public class AiService {
         SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(aiConfig.getSystemTemplate());
         Message systemMessage = systemPromptTemplate.createMessage();
 
-        PromptTemplate promptTemplate = new PromptTemplate("群友向你提出了下列的问题：{query}");
+        PromptTemplate promptTemplate = new PromptTemplate(aiConfig.getPromptTemplate() + "：{query}");
         Message userMessage = promptTemplate.createMessage(Map.of("query", text));
 
         OpenAiChatOptions modelOptions = new OpenAiChatOptions();
         modelOptions.setModel(aiConfig.getModel());
+        modelOptions.setMaxTokens(aiConfig.getMaxToken());
         modelOptions.setTemperature(Float.valueOf(aiConfig.getTemperature()));
 
         Prompt prompt = new Prompt(List.of(systemMessage, userMessage), modelOptions);
@@ -55,6 +56,8 @@ public class AiService {
                         CREATE TABLE IF NOT EXISTS plugin_ai (
                             group_id INTEGER PRIMARY KEY,
                             system_template TEXT DEFAULT '你是群聊中的知识文库，你的语言风格是幽默的',
+                            prompt_template TEXT DEFAULT '群友向你提出了下列的问题',
+                            max_token TEXT DEFAULT 1024,
                             model TEXT DEFAULT 'gpt-3.5-turbo',
                             temperature REAL DEFAULT 0.7,
                             is_disable INTEGER DEFAULT 0 CHECK (is_disable IN (0, 1))

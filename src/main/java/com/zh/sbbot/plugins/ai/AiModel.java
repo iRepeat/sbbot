@@ -20,6 +20,11 @@ public class AiModel {
     private String systemTemplate;
 
     /**
+     * prompt模板
+     */
+    private String promptTemplate;
+
+    /**
      * 模型。默认gpt-3.5-turbo
      */
     private String model;
@@ -33,6 +38,11 @@ public class AiModel {
      * 是否禁用。0: 开启 1: 禁用
      */
     private Integer isDisable;
+
+    /**
+     * 最大token数。默认1024
+     */
+    private Integer maxToken;
 
 
     @Override
