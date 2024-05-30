@@ -1,6 +1,7 @@
 package com.zh.sbbot.plugins.push;
 
 import com.alibaba.fastjson2.JSONObject;
+import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.core.BotContainer;
 import com.mikuac.shiro.dto.action.common.ActionData;
@@ -31,7 +32,7 @@ public class MsgPushController {
     private static ResponseEntity<String> sendPrivate(SimplePushModel model, Bot bot) {
         ActionList<FriendInfoResp> friendList = bot.getFriendList();
         if (friendList.getData().stream().anyMatch(friendInfoResp -> friendInfoResp.getUserId().equals(model.getTarget()))) {
-            ActionData<MsgId> actionData = bot.sendPrivateMsg(model.getTarget(), model.getText(), false);
+            ActionData<MsgId> actionData = bot.sendPrivateMsg(model.getTarget(), ShiroUtils.rawToArrayMsg(model.getText()), false);
             log.info("push private message: {}. result: {}", model, actionData);
             return ResponseEntity.ok(JSONObject.toJSONString(actionData));
         } else return ResponseEntity.badRequest().body("I have no friend: " + model.getTarget());
@@ -40,7 +41,7 @@ public class MsgPushController {
     private static ResponseEntity<String> sendGroup(SimplePushModel model, Bot bot) {
         ActionList<GroupInfoResp> groupList = bot.getGroupList();
         if (groupList.getData().stream().anyMatch(friendInfoResp -> friendInfoResp.getGroupId().equals(model.getTarget()))) {
-            ActionData<MsgId> actionData = bot.sendGroupMsg(model.getTarget(), model.getText(), false);
+            ActionData<MsgId> actionData = bot.sendGroupMsg(model.getTarget(), ShiroUtils.rawToArrayMsg(model.getText()), false);
             log.info("push group message: {}. result: {}", model, actionData);
             return ResponseEntity.ok(JSONObject.toJSONString(actionData));
         } else return ResponseEntity.badRequest().body("I have no group: " + model.getTarget());

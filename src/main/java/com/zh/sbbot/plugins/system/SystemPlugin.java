@@ -3,6 +3,8 @@ package com.zh.sbbot.plugins.system;
 import com.mikuac.shiro.annotation.AnyMessageHandler;
 import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
+import com.mikuac.shiro.common.utils.ShiroUtils;
+import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.zh.sbbot.annotations.Admin;
@@ -37,8 +39,16 @@ public class SystemPlugin {
 
     @AnyMessageHandler
     @MessageHandlerFilter(startWith = ".say", at = AtEnum.NOT_NEED)
-    public void say(AnyMessageEvent event, Matcher matcher) {
-        Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> botHelper.reply(event, s));
+    public void say(Bot bot, AnyMessageEvent event, Matcher matcher) {
+        Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> bot.sendMsg(event,
+                    ShiroUtils.rawToArrayMsg(ShiroUtils.unescape(s)), false));
+    }
+
+    @AnyMessageHandler
+    @MessageHandlerFilter(startWith = ".echo", at = AtEnum.NOT_NEED)
+    public void echo(Bot bot, AnyMessageEvent event, Matcher matcher) {
+        Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> bot.sendMsg(event,
+                    ShiroUtils.unescape(s), true));
     }
 
     @AnyMessageHandler
