@@ -30,37 +30,20 @@ public class BotHelper {
     }
 
     /**
-     * 快速回复（文本）。不转义CQ码
+     * 快速回复（文本）
      *
      * @param event 消息事件
      * @param text  回复内容
      */
     public void reply(AnyMessageEvent event, String text) {
-        reply(event, text, false);
-    }
-
-
-    /**
-     * 快速回复（文本）
-     *
-     * @param event      消息事件
-     * @param text       回复内容
-     * @param autoEscape 是否转义CQ码
-     */
-    public void reply(AnyMessageEvent event, String text, boolean autoEscape) {
-        String msg = MsgUtils.builder().reply(event.getMessageId()).text(text).build();
+        String msg = MsgUtils.builder()
+                .reply(event.getMessageId())
+                .text(text)
+                .text("\n")
+                .at(event.getUserId())
+                .build();
         Bot bot = botContainer.robots.get(event.getSelfId());
-        bot.sendMsg(event, msg, autoEscape);
-    }
-
-    /**
-     * 群消息快速回复（文本）。不转义CQ码
-     *
-     * @param event 消息事件
-     * @param text  回复内容
-     */
-    public void replyForGroup(GroupMessageEvent event, String text) {
-        replyForGroup(event, text, false);
+        bot.sendMsg(event, msg, false);
     }
 
 
@@ -69,12 +52,15 @@ public class BotHelper {
      *
      * @param event      消息事件
      * @param text       回复内容
-     * @param autoEscape 是否转义CQ码
      */
-    public void replyForGroup(GroupMessageEvent event, String text, boolean autoEscape) {
-        String msg = MsgUtils.builder().reply(event.getMessageId()).text(text).build();
+    public void replyForGroup(GroupMessageEvent event, String text) {
+        String msg = MsgUtils.builder()
+                .reply(event.getMessageId())
+                .text(text)
+                .text("\n")
+                .at(event.getUserId())
+                .build();
         Bot bot = botContainer.robots.get(event.getSelfId());
-        bot.sendGroupMsg(event.getGroupId(), event.getSender().getUserId(), msg, autoEscape);
+        bot.sendGroupMsg(event.getGroupId(), event.getSender().getUserId(), msg, false);
     }
-
 }
