@@ -79,7 +79,7 @@ public class SystemPlugin {
         }
         log.info("尝试执行命令：{}", param);
         try {
-            String result = CommandExecutor.execute(param);
+            String result = CommandExecutor.execute(param, 10000);
             botHelper.reply(event, StringUtils.isBlank(result) ? "（命令返回空）" : result);
         } catch (Exception e) {
             log.error("执行命令失败！", e);
