@@ -76,8 +76,12 @@ public class SystemPlugin {
         String param = BotUtil.getParam(matcher);
         if (StringUtils.isBlank(param)) {
             botHelper.reply(event, "请给定命令");
+            return;
         }
-        log.info("尝试执行命令：{}", param);
+
+        // 去除转义
+        param = ShiroUtils.unescape(param);
+
         try {
             String result = CommandExecutor.execute(param, 10000);
             botHelper.reply(event, StringUtils.isBlank(result) ? "（命令返回空）" : result);
