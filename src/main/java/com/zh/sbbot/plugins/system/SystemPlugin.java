@@ -11,6 +11,7 @@ import com.zh.sbbot.annotations.Admin;
 import com.zh.sbbot.configs.SystemSetting;
 import com.zh.sbbot.utils.BotHelper;
 import com.zh.sbbot.utils.BotUtil;
+import com.zh.sbbot.utils.CommandExecutor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -41,18 +42,18 @@ public class SystemPlugin {
     @MessageHandlerFilter(startWith = ".say", at = AtEnum.NOT_NEED)
     public void say(Bot bot, AnyMessageEvent event, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> bot.sendMsg(event,
-                    ShiroUtils.rawToArrayMsg(ShiroUtils.unescape(s)), false));
+                ShiroUtils.rawToArrayMsg(ShiroUtils.unescape(s)), false));
     }
 
     @AnyMessageHandler
     @MessageHandlerFilter(startWith = ".echo", at = AtEnum.NOT_NEED)
     public void echo(Bot bot, AnyMessageEvent event, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> bot.sendMsg(event,
-                    ShiroUtils.unescape(s), true));
+                ShiroUtils.unescape(s), true));
     }
 
     @AnyMessageHandler
-    @MessageHandlerFilter(startWith = ".up", at = AtEnum.NOT_NEED)
+    @MessageHandlerFilter(cmd = ".up", at = AtEnum.NOT_NEED)
     public void up(AnyMessageEvent event) {
         systemSetting.setEnable(true);
         log.info("bot已全局开启（临时）");
@@ -61,11 +62,29 @@ public class SystemPlugin {
 
 
     @AnyMessageHandler
-    @MessageHandlerFilter(startWith = ".down", at = AtEnum.NOT_NEED)
+    @MessageHandlerFilter(cmd = ".down", at = AtEnum.NOT_NEED)
     public void down(AnyMessageEvent event) {
         systemSetting.setEnable(false);
         log.info("bot已全局禁用（临时）");
         botHelper.reply(event, "bot已全局禁用（临时）");
+    }
+
+
+    @AnyMessageHandler
+    @MessageHandlerFilter(startWith = ".exec", at = AtEnum.NOT_NEED)
+    public void exec(AnyMessageEvent event, Matcher matcher) {
+        String param = BotUtil.getParam(matcher);
+        if (StringUtils.isBlank(param)) {
+            botHelper.reply(event, "请给定命令");
+        }
+        log.info("尝试执行命令：{}", param);
+        try {
+            String result = CommandExecutor.execute(param);
+            botHelper.reply(event, StringUtils.isBlank(result) ? "（命令返回空）" : result);
+        } catch (Exception e) {
+            log.error("执行命令失败！", e);
+            botHelper.reply(event, "执行命令失败！\n" + e.getMessage());
+        }
     }
 
     @AnyMessageHandler
