@@ -8,6 +8,9 @@ import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.zh.sbbot.annotations.Admin;
+import com.zh.sbbot.plugins.ai.dao.PluginAi;
+import com.zh.sbbot.plugins.ai.dao.PluginAiRepository;
+import com.zh.sbbot.plugins.ai.handler.AiHandlerSelector;
 import com.zh.sbbot.utils.BotHelper;
 import com.zh.sbbot.utils.BotUtil;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +29,8 @@ import static com.zh.sbbot.utils.BotUtil.getText;
 @SuppressWarnings("unused")
 @RequiredArgsConstructor
 public class AiPlugin {
-    private final AiService aiService;
+    private final AiHandlerSelector aiHandlerSelector;
+    private final PluginAiRepository pluginAiRepository;
     private final BotHelper botHelper;
 
 
@@ -34,18 +38,27 @@ public class AiPlugin {
     @MessageHandlerFilter(at = AtEnum.NEED)
     public void generateAnswer(GroupMessageEvent event) {
         Long groupId = event.getGroupId();
-        AiModel aiConfig = aiService.findOne(groupId);
+        PluginAi pluginAi = pluginAiRepository.findOne(groupId);
 
         // 如果配置不存在，则初始化配置
-        if (Objects.equals(aiConfig.getIsDisable(), 1)) {
+        if (Objects.equals(pluginAi.getIsDisable(), 1)) {
             botHelper.replyForGroup(event, "AI功能已关闭");
             return;
         }
 
+        String conversationId = groupId + "::" + event.getUserId();
+
         String text = getText(event.getArrayMsg());
         log.info("问题：{}", text);
 
-        String answer = aiService.getAnswer(aiConfig, text);
+        // 清除上下文
+        if (text.startsWith("!!") || text.startsWith("！！")) {
+            aiHandlerSelector.getAiService().clear(conversationId);
+            text = text.substring(2);
+        }
+
+        String answer = aiHandlerSelector.getAiService().generateAnswer(pluginAi, text,
+                conversationId);
         log.info("AI： {}", answer);
 
         botHelper.replyForGroup(event, answer);
@@ -82,24 +95,28 @@ public class AiPlugin {
         String action = split[0].toLowerCase();
         switch (action) {
             case "init":
-                aiService.init(groupId);
+                pluginAiRepository.init(groupId);
                 botHelper.reply(event, "初始化成功：" + groupId);
                 break;
             case "disable":
-                aiService.disable(groupId);
+                pluginAiRepository.disable(groupId);
                 botHelper.reply(event, "禁用成功：" + groupId);
                 break;
             case "enable":
-                aiService.enable(groupId);
+                pluginAiRepository.enable(groupId);
                 botHelper.reply(event, "启用成功：" + groupId);
                 break;
             case "get":
-                AiModel aiConfig = aiService.findOne(groupId);
-                if (aiConfig == null) {
+                PluginAi pluginAi = pluginAiRepository.findOne(groupId);
+                if (pluginAi == null) {
                     botHelper.reply(event, "AI功能未初始化");
                 } else {
-                    botHelper.reply(event, "AI配置：" + aiConfig);
+                    botHelper.reply(event, "AI配置：" + pluginAi);
                 }
+                break;
+            case "!!": case "！！":
+                aiHandlerSelector.getAiService().clearByPrefix(groupId.toString());
+                botHelper.reply(event, "清除成功: " + groupId);
                 break;
             default:
                 botHelper.reply(event, "未知操作：" + action);

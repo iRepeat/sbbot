@@ -10,8 +10,8 @@ spring:
 
   ai:
     openai:
-      api-key: ""
-      base-url: ""
+      api-key: "sk-xxx"
+      base-url: "http://xxx.com"
 
 
 server:

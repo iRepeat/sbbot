@@ -1,4 +1,4 @@
-package com.zh.sbbot.plugins.ai;
+package com.zh.sbbot.plugins.ai.dao;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
@@ -7,7 +7,7 @@ import lombok.SneakyThrows;
 
 @Getter
 @Setter
-public class AiModel {
+public class PluginAi {
 
     /**
      * 主键，群组id

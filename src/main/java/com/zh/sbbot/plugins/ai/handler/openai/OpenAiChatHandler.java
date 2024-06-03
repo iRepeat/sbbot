@@ -1,0 +1,60 @@
+package com.zh.sbbot.plugins.ai.handler.openai;
+
+import com.zh.sbbot.plugins.ai.common.AIVendorEnum;
+import com.zh.sbbot.plugins.ai.dao.PluginAi;
+import com.zh.sbbot.plugins.ai.handler.AiHandler;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.stereotype.Service;
+
+import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY;
+import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY;
+
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class OpenAiChatHandler implements AiHandler {
+    private final OpenAiChatModel openAiApi;
+    private final CustomInMemoryChatMemory chatMemory = new CustomInMemoryChatMemory();
+
+
+    @Override
+    public String generateAnswer(PluginAi pluginAi, String text, String conversationId) {
+
+        return ChatClient
+                .builder(openAiApi)
+                .defaultAdvisors(new PromptChatMemoryAdvisor(chatMemory))
+                .build()
+                .prompt()
+                .options(OpenAiChatOptions.builder().withModel(pluginAi.getModel()).withMaxTokens(pluginAi.getMaxToken())
+                        .withTemperature(Float.valueOf(pluginAi.getTemperature())).build())
+                .system(pluginAi.getSystemTemplate())
+                .user(pluginAi.getPromptTemplate() + "：" + text)
+                .advisors(a -> a
+                        .param(CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId)
+                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100))
+                .call()
+                .content();
+    }
+
+    @Override
+    public String vendor() {
+        return AIVendorEnum.OPENAI.name();
+    }
+
+    @Override
+    public void clear(String conversationId) {
+        this.chatMemory.clear(conversationId);
+    }
+
+    @Override
+    public void clearByPrefix(String conversationIdPrefix) {
+        this.chatMemory.clearByPrefix(conversationIdPrefix);
+    }
+
+
+}
