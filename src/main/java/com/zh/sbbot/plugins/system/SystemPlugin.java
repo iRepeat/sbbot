@@ -9,6 +9,7 @@ import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.zh.sbbot.annotations.Admin;
 import com.zh.sbbot.configs.SystemSetting;
+import com.zh.sbbot.repository.DictRepository;
 import com.zh.sbbot.utils.BotHelper;
 import com.zh.sbbot.utils.BotUtil;
 import com.zh.sbbot.utils.CommandExecutor;
@@ -37,6 +38,7 @@ public class SystemPlugin {
     private final SystemSetting systemSetting;
     private final JdbcTemplate jdbcTemplate;
     private final BotHelper botHelper;
+    private final DictRepository dictRepository;
 
     @AnyMessageHandler
     @MessageHandlerFilter(startWith = ".say", at = AtEnum.NOT_NEED)
@@ -121,5 +123,29 @@ public class SystemPlugin {
 
         botHelper.reply(event, msg);
     }
+
+    @AnyMessageHandler
+    @MessageHandlerFilter(startWith = ".set", at = AtEnum.NOT_NEED)
+    public void set(AnyMessageEvent event, Matcher matcher) {
+        Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> {
+            String[] params = s.split(" ", 2);
+            dictRepository.setValue(ShiroUtils.unescape(params[0]), ShiroUtils.unescape(params[1]));
+            botHelper.reply(event, "设置成功！");
+        });
+    }
+
+    @AnyMessageHandler
+    @MessageHandlerFilter(startWith = ".get", at = AtEnum.NOT_NEED)
+    public void get(AnyMessageEvent event, Matcher matcher) {
+        String s = BotUtil.getParam(matcher);
+        if (StringUtils.isNotBlank(s)) {
+            String value = dictRepository.getValue(s);
+            botHelper.reply(event, s + " = " + value);
+        } else {
+            List<String> keys = dictRepository.getAllKeys();
+            botHelper.reply(event, "所有key：\n" + String.join("\n", keys));
+        }
+    }
+
 
 }

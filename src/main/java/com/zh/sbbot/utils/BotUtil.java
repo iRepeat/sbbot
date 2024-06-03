@@ -3,6 +3,7 @@ package com.zh.sbbot.utils;
 import com.mikuac.shiro.enums.MsgTypeEnum;
 import com.mikuac.shiro.model.ArrayMsg;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +19,7 @@ public class BotUtil {
      * 提取消息参数
      */
     public static @Nullable String getParam(Matcher matcher) {
-        return Optional.ofNullable(matcher.group(2)).map(String::trim).orElse(null);
+        return Optional.ofNullable(matcher.group(2)).map(String::trim).filter(StringUtils::isNotBlank).orElse(null);
     }
 
 
