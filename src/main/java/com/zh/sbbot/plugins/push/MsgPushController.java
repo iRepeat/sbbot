@@ -15,10 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 
@@ -47,8 +44,8 @@ public class MsgPushController {
         } else return ResponseEntity.badRequest().body("I have no group: " + model.getTarget());
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/simple")
-    public ResponseEntity<String> pushMsg(@RequestBody @Validated SimplePushModel model) {
+    @RequestMapping(value = "/simple")
+    public ResponseEntity<String> pushMsg(@ModelAttribute @Validated SimplePushModel model) {
         if (StringUtils.isBlank(model.getText())) {
             return ResponseEntity.badRequest().body("text is empty");
         }
