@@ -102,6 +102,7 @@ public class SystemPlugin {
             return;
         }
 
+        sql = ShiroUtils.unescape(sql);
         log.info("尝试执行：{}", sql);
         String msg;
         try {
@@ -139,6 +140,7 @@ public class SystemPlugin {
     public void get(AnyMessageEvent event, Matcher matcher) {
         String s = BotUtil.getParam(matcher);
         if (StringUtils.isNotBlank(s)) {
+            s = ShiroUtils.unescape(s);
             String value = dictRepository.getValue(s);
             botHelper.reply(event, s + " = " + value);
         } else {
