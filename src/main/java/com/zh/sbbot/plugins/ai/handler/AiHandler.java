@@ -19,6 +19,11 @@ public interface AiHandler {
     String vendor();
 
     /**
+     * 默认模型
+     */
+    String defaultModel();
+
+    /**
      * 清除某个会话
      */
     void clear(String conversationId);

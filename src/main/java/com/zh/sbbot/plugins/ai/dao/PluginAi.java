@@ -25,12 +25,12 @@ public class PluginAi {
     private String promptTemplate;
 
     /**
-     * 模型。默认gpt-3.5-turbo
+     * 模型
      */
     private String model;
 
     /**
-     * 模型的温度参数。默认0.7
+     * 模型的温度参数
      */
     private String temperature;
 
@@ -40,9 +40,14 @@ public class PluginAi {
     private Integer isDisable;
 
     /**
-     * 最大token数。默认1024
+     * 最大token数
      */
     private Integer maxToken;
+
+    /**
+     * 历史消息数
+     */
+    private Integer lastN;
 
 
     @Override

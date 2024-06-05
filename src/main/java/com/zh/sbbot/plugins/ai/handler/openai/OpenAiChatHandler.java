@@ -31,7 +31,7 @@ public class OpenAiChatHandler implements AiHandler {
                 .build()
                 .prompt()
                 .options(OpenAiChatOptions.builder().withModel(pluginAi.getModel()).withMaxTokens(pluginAi.getMaxToken())
-                        .withTemperature(Float.valueOf(pluginAi.getTemperature())).build())
+                        .withTemperature(Float.valueOf(pluginAi.getTemperature())).withN(pluginAi.getLastN()).build())
                 .system(pluginAi.getSystemTemplate())
                 .user(pluginAi.getPromptTemplate() + "：" + text)
                 .advisors(a -> a
@@ -44,6 +44,11 @@ public class OpenAiChatHandler implements AiHandler {
     @Override
     public String vendor() {
         return AIVendorEnum.OPENAI.name();
+    }
+
+    @Override
+    public String defaultModel() {
+        return "gpt-3.5-turbo";
     }
 
     @Override
