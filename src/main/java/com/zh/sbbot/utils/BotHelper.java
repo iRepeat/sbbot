@@ -26,7 +26,7 @@ public class BotHelper {
      * @return 是否是超级用户
      */
     public boolean isSuperUser(Long userId) {
-        return systemSetting.getSuperUser().contains(userId);
+        return systemSetting.getSuperUser().contains(String.valueOf(userId));
     }
 
     /**

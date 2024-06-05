@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -15,6 +17,7 @@ import java.util.List;
  * 可用作系统动态配置
  */
 @Repository
+@Slf4j
 @RequiredArgsConstructor
 public class DictRepository {
     private final JdbcTemplate jdbcTemplate;
@@ -32,7 +35,12 @@ public class DictRepository {
      * 获取键值对
      */
     public String getValue(String key) {
-        return this.jdbcTemplate.queryForObject("SELECT value FROM dict WHERE key = ?", String.class, key);
+        try {
+            return this.jdbcTemplate.queryForObject("SELECT value FROM dict WHERE key = ?", String.class, key);
+        } catch (IncorrectResultSizeDataAccessException e) {
+            log.warn("key not found: {}", key);
+            return null;
+        }
     }
 
     /**
@@ -41,6 +49,7 @@ public class DictRepository {
     @SuppressWarnings("unchecked")
     public <T> T getValue(String key, Class<T> type) {
         String value = getValue(key);
+        if (value == null) return null;
         return type.equals(String.class) ? (T) value : JSONObject.parseObject(value, type, JSONReader.Feature.SupportSmartMatch);
     }
 
