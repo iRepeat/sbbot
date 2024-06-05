@@ -9,7 +9,7 @@ spring:
     url: "jdbc:sqlite:./sbbot.db"
 
   ai:
-    openai:
+    openai: # openai配置
       api-key: "sk-xxx"
       base-url: "http://xxx.com"
 
@@ -70,4 +70,9 @@ shiro:
     enable: true
 
   interceptor: com.zh.sbbot.interceptor.CustomInterceptor
+  plugin:
+    ai:
+      qwen: # 通义千问配置
+        api-key: sk-xxx
+
 
