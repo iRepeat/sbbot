@@ -3,15 +3,14 @@ package com.zh.sbbot.plugins.ai;
 import com.mikuac.shiro.annotation.GroupMessageHandler;
 import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
+import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.zh.sbbot.annotations.Admin;
-import com.zh.sbbot.constant.DictKey;
 import com.zh.sbbot.plugins.ai.dao.PluginAi;
 import com.zh.sbbot.plugins.ai.dao.PluginAiRepository;
 import com.zh.sbbot.plugins.ai.handler.AiHandler;
 import com.zh.sbbot.plugins.ai.handler.AiHandlerSelector;
-import com.zh.sbbot.repository.DictRepository;
 import com.zh.sbbot.utils.BotHelper;
 import com.zh.sbbot.utils.BotUtil;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +33,6 @@ import static com.zh.sbbot.utils.BotUtil.getText;
 public class AiPlugin {
     private final AiHandlerSelector aiHandlerSelector;
     private final PluginAiRepository pluginAiRepository;
-    private final DictRepository dictRepository;
     private final BotHelper botHelper;
 
 
@@ -42,32 +40,37 @@ public class AiPlugin {
     @MessageHandlerFilter(at = AtEnum.NEED)
     public void generateAnswer(GroupMessageEvent event) {
         Long groupId = event.getGroupId();
-        PluginAi pluginAi = pluginAiRepository.findOne(groupId);
 
+        // 读取当前群组的配置
+        PluginAi pluginAi = pluginAiRepository.findOne(groupId);
         if (pluginAi == null) {
             botHelper.replyForGroup(event, "AI配置未初始化");
             return;
         }
 
-        // 如果配置不存在，则初始化配置
+        // 群AI已禁用
         if (Objects.equals(pluginAi.getIsDisable(), 1)) {
             botHelper.replyForGroup(event, "AI功能已关闭");
             return;
         }
 
-        String conversationId = groupId + "::" + event.getUserId();
+        // 获取当前群组的AI服务
+        AiHandler aiHandler = aiHandlerSelector.get(groupId);
 
         String text = getText(event.getArrayMsg());
         log.info("问题：{}", text);
 
-        // 清除上下文
+        // 当前用户的会话ID
+        String conversationId = groupId + "::" + event.getUserId();
+
+        // 清除当前用户上下文
         if (text.startsWith("!!") || text.startsWith("！！")) {
-            aiHandlerSelector.getAiService().clear(conversationId);
+            aiHandler.clear(conversationId);
             text = text.substring(2);
         }
 
-        String answer = aiHandlerSelector.getAiService().generateAnswer(pluginAi, text,
-                conversationId);
+        // 生成AI回复
+        String answer = aiHandler.generateAnswer(pluginAi, text, conversationId);
         log.info("AI： {}", answer);
 
         botHelper.replyForGroup(event, answer);
@@ -80,13 +83,14 @@ public class AiPlugin {
 
         String usage = """
                 Usage:
-                - init: 初始化群组的AI功能配置
-                - init 0: 初始化AI功能配置表
+                - reset: 重置AI配置表
+                - init: 初始化当前群组的AI配置
                 - disable: 禁用群组的AI功能
                 - enable: 启用群组的AI功能
-                - get: 获取当前群组的AI配置信息
-                - !! or ！！: 清除指定群组的AI历史记录
-                - service [AI服务名]: 切换当前群组的AI服务""";
+                - get: 获取群组的AI配置
+                - set [字段] [值]: 更新群组的AI配置
+                - !! or ！！: 清除群组的AI历史记录
+                - service [AI服务名]: 切换群组的AI服务""";
 
         String param = BotUtil.getParam(matcher);
         if (StringUtils.isBlank(param)) {
@@ -97,16 +101,18 @@ public class AiPlugin {
         // 群号从事件中获取
         Long groupId = event.getGroupId();
 
-        String[] split = param.split(" ");
+        String[] split = ShiroUtils.unescape(param).split(" ");
         String action = split[0].toLowerCase();
         switch (action) {
+            case "reset":
+                pluginAiRepository.initTable();
+                botHelper.replyForGroup(event, "初始化表成功");
+                break;
             case "init":
-                if (split.length == 2 && split[1].equals("0")) {
-                    pluginAiRepository.initTable();
-                    botHelper.replyForGroup(event, "初始化表成功");
-                }
-                pluginAiRepository.init(groupId, aiHandlerSelector.getAiService().defaultModel());
-                botHelper.replyForGroup(event, "初始化配置成功：" + groupId);
+                AiHandler defaultAIHandler = aiHandlerSelector.getDefault();
+                pluginAiRepository.init(groupId, defaultAIHandler.defaultModel(), defaultAIHandler.vendor());
+                botHelper.replyForGroup(event, "初始化配置成功：%s，平台：%s，模型：%s".formatted(groupId,
+                        defaultAIHandler.vendor(), defaultAIHandler.defaultModel()));
                 break;
             case "disable":
                 pluginAiRepository.disable(groupId);
@@ -119,22 +125,26 @@ public class AiPlugin {
             case "get":
                 PluginAi pluginAi = pluginAiRepository.findOne(groupId);
                 if (pluginAi == null) {
-                    botHelper.replyForGroup(event, "AI功能未初始化");
+                    botHelper.replyForGroup(event, "AI配置未初始化");
                 } else {
-                    String value = dictRepository.getValue(DictKey.PLUGIN_AI_USE);
-                    botHelper.replyForGroup(event, "当前AI：%s，配置：%s".formatted(value, pluginAi));
+                    botHelper.replyForGroup(event, "当前AI配置：%s".formatted(pluginAi));
                 }
                 break;
-            case "!!": case "！！":
-                aiHandlerSelector.getAiService().clearByPrefix(groupId.toString());
+            case "set":
+                int i = pluginAiRepository.update(split[1], split[2], groupId);
+                PluginAi config = pluginAiRepository.findOne(groupId);
+                botHelper.replyForGroup(event, "配置更新成功，影响行数：%s！当前AI配置：%s".formatted(i, config));
+                break;
+            case "!!":
+            case "！！":
+                aiHandlerSelector.get(groupId).clearByPrefix(groupId.toString());
                 botHelper.replyForGroup(event, "记忆清除成功: " + groupId);
                 break;
             case "service":
-                dictRepository.setValue(DictKey.PLUGIN_AI_USE, split[1]);
-                // 切换当前群聊默认模型
-                AiHandler aiService = aiHandlerSelector.getAiService();
-                pluginAiRepository.switchModel(groupId, aiService.defaultModel());
-                botHelper.replyForGroup(event, "群聊AI已切换：%s，模型：%s".formatted(aiService.vendor(), aiService.defaultModel()));
+                // 切换当前群聊AI
+                AiHandler aiHandler = aiHandlerSelector.set(groupId, split[1]);
+                pluginAiRepository.switchAi(groupId, aiHandler.vendor(), aiHandler.defaultModel());
+                botHelper.replyForGroup(event, "群聊AI已切换：%s，模型：%s".formatted(aiHandler.vendor(), aiHandler.defaultModel()));
                 break;
             default:
                 botHelper.replyForGroup(event, "参数错误：“%s”\n%s".formatted(action, usage));

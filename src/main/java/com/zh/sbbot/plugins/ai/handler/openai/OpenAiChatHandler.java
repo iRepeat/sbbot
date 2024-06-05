@@ -43,7 +43,7 @@ public class OpenAiChatHandler implements AiHandler {
 
     @Override
     public String vendor() {
-        return AIVendorEnum.OPENAI.name();
+        return AIVendorEnum.openai.name();
     }
 
     @Override

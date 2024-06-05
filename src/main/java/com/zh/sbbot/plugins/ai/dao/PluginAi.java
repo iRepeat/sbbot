@@ -49,6 +49,17 @@ public class PluginAi {
      */
     private Integer lastN;
 
+    /**
+     * 启用搜索 0：禁用 1：启用
+     */
+    private Integer enableSearch;
+
+    /**
+     * 当前AI平台
+     * {@link com.zh.sbbot.plugins.ai.common.AIVendorEnum}
+     */
+    private String vendor;
+
 
     @Override
     @SneakyThrows

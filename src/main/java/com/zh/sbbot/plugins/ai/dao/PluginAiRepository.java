@@ -10,6 +10,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Repository
 @RequiredArgsConstructor
 @Transactional
@@ -21,12 +23,12 @@ public class PluginAiRepository {
     /**
      * 初始化对应群组的配置
      */
-    public void init(long groupId, String defaultModel) {
+    public void init(long groupId, String defaultModel, String vendor) {
         String deleteSql = "DELETE FROM plugin_ai WHERE group_id = ?";
         jdbcTemplate.update(deleteSql, groupId);
-        String insertSql = "INSERT INTO plugin_ai (group_id, model) values (?,?)";
+        String sql = "INSERT INTO plugin_ai (group_id, model, vendor) values (?,?,?)";
         // 使用当前AI服务的默认模型作为群聊的默认模型
-        jdbcTemplate.update(insertSql, groupId, defaultModel);
+        jdbcTemplate.update(sql, groupId, defaultModel, vendor);
     }
 
     /**
@@ -39,13 +41,18 @@ public class PluginAiRepository {
     }
 
     public void disable(long groupId) {
-        String insertSql = "update plugin_ai set is_disable = 1 where group_id = ?";
-        jdbcTemplate.update(insertSql, groupId);
+        String sql = "update plugin_ai set is_disable = 1 where group_id = ?";
+        jdbcTemplate.update(sql, groupId);
     }
 
     public void enable(long groupId) {
-        String insertSql = "update plugin_ai set is_disable = 0 where group_id = ?";
-        jdbcTemplate.update(insertSql, groupId);
+        String sql = "update plugin_ai set is_disable = 0 where group_id = ?";
+        jdbcTemplate.update(sql, groupId);
+    }
+
+    public List<PluginAi> getAll() {
+        String sql = "SELECT * FROM plugin_ai";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(PluginAi.class));
     }
 
     public PluginAi findOne(long groupId) {
@@ -58,8 +65,13 @@ public class PluginAiRepository {
         }
     }
 
-    public void switchModel(Long groupId, String model) {
-        String insertSql = "update plugin_ai set model = ? where group_id = ?";
-        jdbcTemplate.update(insertSql, model, groupId);
+    public void switchAi(Long groupId, String vendor, String model) {
+        String sql = "update plugin_ai set model = ?, vendor = ? where group_id = ?";
+        jdbcTemplate.update(sql, model, vendor, groupId);
+    }
+
+    public int update(String column, String value, Long groupId) {
+        String sql = "update plugin_ai set %s = ? where group_id = ?".formatted(column);
+        return jdbcTemplate.update(sql, value, groupId);
     }
 }

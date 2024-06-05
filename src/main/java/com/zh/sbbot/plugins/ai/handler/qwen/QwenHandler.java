@@ -42,8 +42,7 @@ public class QwenHandler implements AiHandler {
                     .topP(0.8)
                     .prompt(pluginAi.getPromptTemplate())
                     .maxTokens(pluginAi.getMaxToken())
-                    .enableSearch(true)
-//                    .incrementalOutput(true) // 流式输出
+                    .enableSearch(pluginAi.getEnableSearch() == 1)
                     .build();
 
             // 调用
@@ -62,7 +61,7 @@ public class QwenHandler implements AiHandler {
 
     @Override
     public String vendor() {
-        return AIVendorEnum.QWEN.name();
+        return AIVendorEnum.qwen.name();
     }
 
     @Override
