@@ -33,6 +33,7 @@ public class QianFanHandler implements AiHandler {
                     .model(pluginAi.getModel())
                     .messages(chatHistory.lastN(conversationId, pluginAi.getLastN()))
                     .system(pluginAi.getSystemTemplate())
+                    .topP(Double.valueOf(pluginAi.getTopP()))
                     .temperature(Double.valueOf(pluginAi.getTemperature()))
                     .disableSearch(pluginAi.getEnableSearch() == 0)
                     .maxOutputTokens(pluginAi.getMaxToken())

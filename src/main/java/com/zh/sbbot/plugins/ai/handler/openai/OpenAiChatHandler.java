@@ -32,9 +32,9 @@ public class OpenAiChatHandler implements AiHandler {
                 .build()
                 .prompt()
                 .options(OpenAiChatOptions.builder().withModel(pluginAi.getModel()).withMaxTokens(pluginAi.getMaxToken())
-                        .withTemperature(Float.valueOf(pluginAi.getTemperature())).withN(pluginAi.getLastN()).build())
+                        .withTemperature(Float.valueOf(pluginAi.getTemperature())).withN(pluginAi.getLastN()).withTopP(Float.valueOf(pluginAi.getTopP())).build())
                 .system(pluginAi.getSystemTemplate())
-                .user(pluginAi.getPromptTemplate() + "：" + text)
+                .user(text)
                 .advisors(a -> a
                         .param(CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId)
                         .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100))

@@ -21,11 +21,6 @@ public class PluginAi {
     private String systemTemplate;
 
     /**
-     * prompt模板
-     */
-    private String promptTemplate;
-
-    /**
      * 模型
      */
     private String model;
@@ -60,6 +55,11 @@ public class PluginAi {
      * {@link VendorEnum}
      */
     private String vendor;
+
+    /**
+     * topP参数
+     */
+    private String topP;
 
 
     @Override

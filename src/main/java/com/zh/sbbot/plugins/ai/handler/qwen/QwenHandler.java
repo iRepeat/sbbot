@@ -12,7 +12,6 @@ import com.zh.sbbot.plugins.ai.support.VendorEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 
 @Service
@@ -39,8 +38,7 @@ public class QwenHandler implements AiHandler {
                     .messages(chatHistory.lastN(conversationId, pluginAi.getLastN()))
                     .resultFormat(GenerationParam.ResultFormat.MESSAGE)
                     .temperature(Float.valueOf(pluginAi.getTemperature()))
-                    .topP(0.8)
-                    .prompt(pluginAi.getPromptTemplate())
+                    .topP(Double.valueOf(pluginAi.getTopP()))
                     .maxTokens(pluginAi.getMaxToken())
                     .enableSearch(pluginAi.getEnableSearch() == 1)
                     .build();
