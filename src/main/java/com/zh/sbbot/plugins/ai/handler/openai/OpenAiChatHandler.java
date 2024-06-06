@@ -1,8 +1,9 @@
 package com.zh.sbbot.plugins.ai.handler.openai;
 
-import com.zh.sbbot.plugins.ai.support.VendorEnum;
 import com.zh.sbbot.plugins.ai.dao.PluginAi;
 import com.zh.sbbot.plugins.ai.handler.AiHandler;
+import com.zh.sbbot.plugins.ai.support.ChatResponse;
+import com.zh.sbbot.plugins.ai.support.VendorEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -23,9 +24,9 @@ public class OpenAiChatHandler implements AiHandler {
 
 
     @Override
-    public String generateAnswer(PluginAi pluginAi, String text, String conversationId) {
+    public ChatResponse generateAnswer(PluginAi pluginAi, String text, String conversationId) {
 
-        return ChatClient
+        ChatClient.CallResponseSpec response = ChatClient
                 .builder(openAiApi)
                 .defaultAdvisors(new PromptChatMemoryAdvisor(chatMemory))
                 .build()
@@ -37,8 +38,9 @@ public class OpenAiChatHandler implements AiHandler {
                 .advisors(a -> a
                         .param(CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId)
                         .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100))
-                .call()
-                .content();
+                .call();
+
+        return ChatResponse.build(response.content());
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.zh.sbbot.plugins.ai.handler;
 
 import com.zh.sbbot.plugins.ai.dao.PluginAi;
+import com.zh.sbbot.plugins.ai.support.ChatResponse;
 
 public interface AiHandler {
     /**
@@ -9,9 +10,8 @@ public interface AiHandler {
      * @param text           用户输入的文本
      * @param conversationId 用户的会话ID
      * @param pluginAi       AI配置
-     * @return AI答案
      */
-    String generateAnswer(PluginAi pluginAi, String text, String conversationId);
+    ChatResponse generateAnswer(PluginAi pluginAi, String text, String conversationId);
 
     /**
      * 所属的AI厂商

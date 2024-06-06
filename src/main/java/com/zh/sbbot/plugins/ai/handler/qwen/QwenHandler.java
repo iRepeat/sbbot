@@ -7,10 +7,12 @@ import com.alibaba.dashscope.common.Message;
 import com.alibaba.dashscope.common.Role;
 import com.zh.sbbot.plugins.ai.dao.PluginAi;
 import com.zh.sbbot.plugins.ai.handler.AiHandler;
+import com.zh.sbbot.plugins.ai.support.ChatResponse;
 import com.zh.sbbot.plugins.ai.support.VendorEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 
 @Service
@@ -21,7 +23,7 @@ public class QwenHandler implements AiHandler {
     private final QwenInMemoryChatHistory chatHistory;
 
     @Override
-    public String generateAnswer(PluginAi pluginAi, String text, String conversationId) {
+    public ChatResponse generateAnswer(PluginAi pluginAi, String text, String conversationId) {
         try {
 
             // 添加系统信息（如果不存在）和用户对话到上下文
@@ -50,11 +52,11 @@ public class QwenHandler implements AiHandler {
             Message output = result.getOutput().getChoices().get(0).getMessage();
             chatHistory.add(conversationId, output);
 
-            return output.getContent();
+            return ChatResponse.build(output.getContent());
         } catch (Exception e) {
             log.error("qwen error:", e);
             chatHistory.repairEnd(conversationId);
-            return e.getMessage();
+            return ChatResponse.build(e.getMessage());
         }
     }
 

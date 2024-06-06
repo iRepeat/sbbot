@@ -11,6 +11,7 @@ import com.zh.sbbot.plugins.ai.dao.PluginAi;
 import com.zh.sbbot.plugins.ai.dao.PluginAiRepository;
 import com.zh.sbbot.plugins.ai.handler.AiHandler;
 import com.zh.sbbot.plugins.ai.handler.AiHandlerSelector;
+import com.zh.sbbot.plugins.ai.support.ChatResponse;
 import com.zh.sbbot.utils.BotHelper;
 import com.zh.sbbot.utils.BotUtil;
 import lombok.RequiredArgsConstructor;
@@ -70,10 +71,14 @@ public class AiPlugin {
         }
 
         // 生成AI回复
-        String answer = aiHandler.generateAnswer(pluginAi, text, conversationId);
-        log.info("AI： {}", answer);
+        ChatResponse response = aiHandler.generateAnswer(pluginAi, text, conversationId);
+        log.info("AI： {}", response);
 
-        botHelper.replyForGroup(event, answer);
+        botHelper.replyForGroup(event, response.getResult());
+
+        if (response.isClearHistory()) {
+            botHelper.replyForGroup(event, "当前会话已结束，原因：" + response.getClearReason());
+        }
     }
 
     @Admin

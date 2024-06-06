@@ -1,10 +1,10 @@
 package com.zh.sbbot.plugins.ai.handler.qianfan;
 
 import com.baidubce.qianfan.Qianfan;
-import com.baidubce.qianfan.model.chat.ChatResponse;
 import com.baidubce.qianfan.model.chat.Message;
 import com.zh.sbbot.plugins.ai.dao.PluginAi;
 import com.zh.sbbot.plugins.ai.handler.AiHandler;
+import com.zh.sbbot.plugins.ai.support.ChatResponse;
 import com.zh.sbbot.plugins.ai.support.RoleEnum;
 import com.zh.sbbot.plugins.ai.support.VendorEnum;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ public class QianFanHandler implements AiHandler {
 
 
     @Override
-    public String generateAnswer(PluginAi pluginAi, String text, String conversationId) {
+    public ChatResponse generateAnswer(PluginAi pluginAi, String text, String conversationId) {
         try {
 
             // 添加用户对话到上下文
@@ -28,7 +28,7 @@ public class QianFanHandler implements AiHandler {
             chatHistory.add(conversationId, userMsg);
 
 
-            ChatResponse response = new Qianfan(qianFanConfig.getAuthType(), qianFanConfig.getAccessKey(), qianFanConfig.getSecretKey())
+            com.baidubce.qianfan.model.chat.ChatResponse response = new Qianfan(qianFanConfig.getAuthType(), qianFanConfig.getAccessKey(), qianFanConfig.getSecretKey())
                     .chatCompletion()
                     .model(pluginAi.getModel())
                     .messages(chatHistory.lastN(conversationId, pluginAi.getLastN()))
@@ -41,11 +41,16 @@ public class QianFanHandler implements AiHandler {
             Message assistantMsg = new Message().setRole("assistant").setContent(response.getResult());
             chatHistory.add(conversationId, assistantMsg);
 
-            return assistantMsg.getContent();
+            if (response.getNeedClearHistory()) {
+                clear(conversationId);
+                return ChatResponse.build(assistantMsg.getContent(), "触发百度风控：ban_round="+ response.getBanRound());
+            }
+            return ChatResponse.build(assistantMsg.getContent());
+
         } catch (Exception e) {
             log.error("qianfan error: ", e);
             chatHistory.repairEnd(conversationId);
-            return e.getMessage();
+            return ChatResponse.build(e.getMessage());
         }
     }
 
