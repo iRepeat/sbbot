@@ -74,5 +74,8 @@ shiro:
     ai:
       qwen: # 通义千问配置
         api-key: sk-xxx
+      qianfan: # 千帆大模型
+        access-key: xxx
+        secret-key: xxx
 
 
