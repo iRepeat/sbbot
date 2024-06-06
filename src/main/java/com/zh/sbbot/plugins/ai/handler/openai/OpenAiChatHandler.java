@@ -1,6 +1,6 @@
 package com.zh.sbbot.plugins.ai.handler.openai;
 
-import com.zh.sbbot.plugins.ai.common.AIVendorEnum;
+import com.zh.sbbot.plugins.ai.support.VendorEnum;
 import com.zh.sbbot.plugins.ai.dao.PluginAi;
 import com.zh.sbbot.plugins.ai.handler.AiHandler;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +43,7 @@ public class OpenAiChatHandler implements AiHandler {
 
     @Override
     public String vendor() {
-        return AIVendorEnum.openai.name();
+        return VendorEnum.openai.name();
     }
 
     @Override

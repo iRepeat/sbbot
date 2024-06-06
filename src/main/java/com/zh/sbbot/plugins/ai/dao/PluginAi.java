@@ -1,6 +1,7 @@
 package com.zh.sbbot.plugins.ai.dao;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zh.sbbot.plugins.ai.support.VendorEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -56,7 +57,7 @@ public class PluginAi {
 
     /**
      * 当前AI平台
-     * {@link com.zh.sbbot.plugins.ai.common.AIVendorEnum}
+     * {@link VendorEnum}
      */
     private String vendor;
 
