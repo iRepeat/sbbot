@@ -9,6 +9,8 @@ import com.zh.sbbot.configs.SystemSetting;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+
 /**
  * 结合了spring上下文的bot工具类
  */
@@ -26,7 +28,7 @@ public class BotHelper {
      * @return 是否是超级用户
      */
     public boolean isSuperUser(Long userId) {
-        return systemSetting.getSuperUser().contains(String.valueOf(userId));
+        return Arrays.asList(systemSetting.getSuperUser()).contains(userId);
     }
 
     /**

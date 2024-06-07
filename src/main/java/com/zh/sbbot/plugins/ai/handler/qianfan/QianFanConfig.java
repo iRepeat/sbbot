@@ -1,14 +1,17 @@
 package com.zh.sbbot.plugins.ai.handler.qianfan;
 
 import com.baidubce.qianfan.core.auth.Auth;
+import com.zh.sbbot.utils.ConfigurationInitializer;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+@EqualsAndHashCode(callSuper = true)
 @ConfigurationProperties("shiro.plugin.ai.qianfan")
 @Configuration
 @Data
-public class QianFanConfig {
+public class QianFanConfig extends ConfigurationInitializer {
     private String accessKey;
     private String secretKey;
     /**

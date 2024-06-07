@@ -38,7 +38,7 @@ public class DictRepository {
         try {
             return this.jdbcTemplate.queryForObject("SELECT value FROM dict WHERE key = ?", String.class, key);
         } catch (IncorrectResultSizeDataAccessException e) {
-            log.warn("key not found: {}", key);
+            log.debug("key not found: {}", key);
             return null;
         }
     }
@@ -50,7 +50,13 @@ public class DictRepository {
     public <T> T getValue(String key, Class<T> type) {
         String value = getValue(key);
         if (value == null) return null;
-        return type.equals(String.class) ? (T) value : JSONObject.parseObject(value, type, JSONReader.Feature.SupportSmartMatch);
+        if (type.equals(String.class)) return (T) value;
+        try {
+            return JSONObject.parseObject(value, type, JSONReader.Feature.SupportSmartMatch);
+        } catch (Exception e) {
+            log.error("parse value error: '{}', key: {}, detail: {} ", value, key, e.getMessage());
+            return null;
+        }
     }
 
     /**

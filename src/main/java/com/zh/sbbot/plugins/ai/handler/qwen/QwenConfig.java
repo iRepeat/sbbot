@@ -1,12 +1,15 @@
 package com.zh.sbbot.plugins.ai.handler.qwen;
 
+import com.zh.sbbot.utils.ConfigurationInitializer;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-@ConfigurationProperties("shiro.plugin.ai.qwen")
+@EqualsAndHashCode(callSuper = true)
+@ConfigurationProperties(prefix = "shiro.plugin.ai.qwen")
 @Configuration
 @Data
-public class QwenConfig {
+public class QwenConfig extends ConfigurationInitializer {
     private String apiKey;
 }
