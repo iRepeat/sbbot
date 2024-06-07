@@ -149,6 +149,7 @@ public class AiPlugin {
                 // 切换当前群聊AI
                 AiHandler aiHandler = aiHandlerSelector.set(groupId, split[1]);
                 pluginAiRepository.switchAi(groupId, aiHandler.vendor(), aiHandler.defaultModel());
+                aiHandler.clearByPrefix(groupId.toString());
                 botHelper.replyForGroup(event, "群聊AI已切换：%s，模型：%s".formatted(aiHandler.vendor(), aiHandler.defaultModel()));
                 break;
             default:
