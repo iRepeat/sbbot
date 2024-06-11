@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 
 /**
@@ -105,12 +106,14 @@ public class SystemPlugin {
         sql = ShiroUtils.unescape(sql);
         log.info("尝试执行：{}", sql);
         String msg;
+
         try {
-            sql = sql.trim().toLowerCase();
-            if (sql.startsWith("insert") || sql.startsWith("update") || sql.startsWith("delete")) {
+            String finalSql = sql.trim();
+            Function<String, Boolean> matchIgnoreCase = (keyword) -> finalSql.matches("(?i)^" + keyword + "\\s.*");
+            if (matchIgnoreCase.apply("insert") || matchIgnoreCase.apply("update") || matchIgnoreCase.apply("delete")) {
                 int update = jdbcTemplate.update(sql);
                 msg = String.format("执行更新语句：“%s”成功！影响行数：%d", sql, update);
-            } else if (sql.startsWith("select")) {
+            } else if (matchIgnoreCase.apply("select")) {
                 List<Map<String, Object>> maps = jdbcTemplate.queryForList(sql);
                 msg = String.format("执行查询语句：“%s”成功！\n结果：%s", sql, maps);
             } else {
