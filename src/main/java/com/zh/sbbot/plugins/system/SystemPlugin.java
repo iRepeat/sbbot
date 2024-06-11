@@ -7,6 +7,7 @@ import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
+import com.mikuac.shiro.model.ArrayMsg;
 import com.zh.sbbot.annotations.Admin;
 import com.zh.sbbot.configs.SystemSetting;
 import com.zh.sbbot.repository.DictRepository;
@@ -44,8 +45,11 @@ public class SystemPlugin {
     @AnyMessageHandler
     @MessageHandlerFilter(startWith = ".say", at = AtEnum.NOT_NEED)
     public void say(Bot bot, AnyMessageEvent event, Matcher matcher) {
-        Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> bot.sendMsg(event,
-                ShiroUtils.rawToArrayMsg(ShiroUtils.unescape(s)), false));
+        Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> {
+            List<ArrayMsg> msgList = ShiroUtils.rawToArrayMsg(s);
+            bot.sendMsg(event, BotUtil.adaptImgData(msgList), false);
+        });
+
     }
 
     @AnyMessageHandler

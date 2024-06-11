@@ -46,5 +46,27 @@ public class BotUtil {
                 .collect(Collectors.joining(join)).trim();
     }
 
+    /**
+     * 由于当前lagrange框架无法发送某些域名的图片，因此有了这个适配方法。
+     * <p>
+     * 处理图片消息，将发送图片的方式由url转为base64
+     *
+     * @param arrayMsgList 包含“图片”类型的消息链
+     * @return 原消息链
+     */
+    public static List<ArrayMsg> adaptImgData(List<ArrayMsg> arrayMsgList) {
+        arrayMsgList.forEach(arrayMsg -> {
+            if (arrayMsg.getType().equals(MsgTypeEnum.image)
+                    && StringUtils.isNotBlank(arrayMsg.getData().getOrDefault("file", null))) {
+                String file = arrayMsg.getData().get("file");
+                if (file.startsWith("http://") || file.startsWith("https://")) {
+                    String base64Image = DownloadUtil.downloadIntoMemory(file);
+                    arrayMsg.getData().put("file", "base64://" + base64Image);
+                }
+            }
+
+        });
+        return arrayMsgList;
+    }
 }
 
