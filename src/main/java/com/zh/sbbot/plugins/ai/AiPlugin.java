@@ -1,13 +1,19 @@
 package com.zh.sbbot.plugins.ai;
 
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.TypeReference;
 import com.mikuac.shiro.annotation.GroupMessageHandler;
 import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.core.Bot;
+import com.mikuac.shiro.dto.action.common.ActionData;
+import com.mikuac.shiro.dto.action.response.GetMsgResp;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
+import com.mikuac.shiro.enums.MsgTypeEnum;
+import com.mikuac.shiro.model.ArrayMsg;
 import com.zh.sbbot.annotations.Admin;
 import com.zh.sbbot.plugins.ai.dao.PluginAi;
 import com.zh.sbbot.plugins.ai.dao.PluginAiRepository;
@@ -23,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 
@@ -49,7 +56,7 @@ public class AiPlugin {
         // 读取当前群组的配置
         PluginAi pluginAi = pluginAiRepository.findOne(groupId);
         if (pluginAi == null) {
-            botHelper.replyForGroup(event, "AI配置未初始化");
+            log.error("AI配置未初始化：{}", groupId);
             return;
         }
 
@@ -67,6 +74,21 @@ public class AiPlugin {
 
         // 当前用户的会话ID
         String conversationId = groupId + "::" + event.getUserId();
+
+        try {
+            // 如果是回复机器人信息，则使用机器人所回复的用户的上下文
+            if (BotUtil.isReplyMe(event)) {
+                ActionData<GetMsgResp> msgId =
+                        bot.getMsg(Integer.parseInt(event.getArrayMsg().stream().filter(it -> it.getType() == MsgTypeEnum.reply).findFirst().orElseThrow().getData().get("id")));
+                String qq =
+                        JSONObject.parseObject(msgId.getData().getMessage(), new TypeReference<List<ArrayMsg>>() {
+                        }).stream().filter(it -> it.getType() == MsgTypeEnum.at).findFirst().orElseThrow().getData().get("qq");
+                conversationId = groupId + "::" + qq;
+                log.info("临时切换上下文：{} -> {}", event.getUserId(), qq);
+            }
+        } catch (Exception ignored) {
+        }
+
 
         // 清除当前用户上下文
         if (text.startsWith("!!") || text.startsWith("！！")) {

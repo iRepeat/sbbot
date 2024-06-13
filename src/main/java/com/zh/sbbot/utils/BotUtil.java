@@ -1,5 +1,6 @@
 package com.zh.sbbot.utils;
 
+import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.enums.MsgTypeEnum;
 import com.mikuac.shiro.model.ArrayMsg;
 import jakarta.annotation.Nullable;
@@ -67,6 +68,17 @@ public class BotUtil {
 
         });
         return arrayMsgList;
+    }
+
+    /**
+     * 判断是否是回复机器人
+     */
+    public static boolean isReplyMe(GroupMessageEvent event) {
+        List<ArrayMsg> arrayMsg = event.getArrayMsg();
+        return arrayMsg.stream().anyMatch(msg ->
+                msg.getType().equals(MsgTypeEnum.at)
+                        && msg.getData().get("qq").equals(event.getSelfId().toString())
+                        && arrayMsg.stream().anyMatch(it -> it.getType() == MsgTypeEnum.reply));
     }
 }
 
