@@ -3,7 +3,9 @@ package com.zh.sbbot.plugins.ai;
 import com.mikuac.shiro.annotation.GroupMessageHandler;
 import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
+import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.mikuac.shiro.common.utils.ShiroUtils;
+import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.zh.sbbot.annotations.Admin;
@@ -14,6 +16,7 @@ import com.zh.sbbot.plugins.ai.handler.AiHandlerSelector;
 import com.zh.sbbot.plugins.ai.support.ChatResponse;
 import com.zh.sbbot.utils.BotHelper;
 import com.zh.sbbot.utils.BotUtil;
+import com.zh.sbbot.utils.TTSUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -35,11 +38,12 @@ public class AiPlugin {
     private final AiHandlerSelector aiHandlerSelector;
     private final PluginAiRepository pluginAiRepository;
     private final BotHelper botHelper;
+    private final TTSUtil ttsUtil;
 
 
     @GroupMessageHandler
     @MessageHandlerFilter(at = AtEnum.NEED)
-    public void generateAnswer(GroupMessageEvent event) {
+    public void generateAnswer(GroupMessageEvent event, Bot bot) {
         Long groupId = event.getGroupId();
 
         // 读取当前群组的配置
@@ -75,6 +79,10 @@ public class AiPlugin {
         log.info("AI： {}", response);
 
         botHelper.replyForGroup(event, response.getResult());
+        if (Objects.equals(pluginAi.getTts(), 1)) {
+            String base64 = ttsUtil.generateToBase64(response.getResult());
+            bot.sendGroupMsg(groupId, ArrayMsgUtils.builder().voice("base64://" + base64).build(), false);
+        }
 
         if (response.isClearHistory()) {
             botHelper.replyForGroup(event, "当前会话已结束，原因：" + response.getClearReason());

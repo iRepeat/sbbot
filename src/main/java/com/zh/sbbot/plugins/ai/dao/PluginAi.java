@@ -61,6 +61,11 @@ public class PluginAi {
      */
     private String topP;
 
+    /**
+     * 是否开启tts
+     */
+    private Integer tts;
+
 
     @Override
     @SneakyThrows
