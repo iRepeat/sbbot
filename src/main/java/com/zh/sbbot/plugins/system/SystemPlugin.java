@@ -60,6 +60,13 @@ public class SystemPlugin {
     }
 
     @AnyMessageHandler
+    @MessageHandlerFilter(startWith = ".cq", at = AtEnum.NOT_NEED)
+    public void cq(Bot bot, AnyMessageEvent event, Matcher matcher) {
+        Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> bot.sendMsg(event,
+                ShiroUtils.unescape(s), false));
+    }
+
+    @AnyMessageHandler
     @MessageHandlerFilter(cmd = ".up", at = AtEnum.NOT_NEED)
     public void up(AnyMessageEvent event) {
         systemSetting.setEnable(true);
