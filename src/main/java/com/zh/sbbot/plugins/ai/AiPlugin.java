@@ -22,6 +22,7 @@ import com.zh.sbbot.plugins.ai.handler.AiHandlerSelector;
 import com.zh.sbbot.plugins.ai.support.ChatResponse;
 import com.zh.sbbot.utils.BotHelper;
 import com.zh.sbbot.utils.BotUtil;
+import com.zh.sbbot.utils.OCRUtil;
 import com.zh.sbbot.utils.TTSUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 
 import static com.zh.sbbot.utils.BotUtil.getText;
 
@@ -46,7 +48,7 @@ public class AiPlugin {
     private final PluginAiRepository pluginAiRepository;
     private final BotHelper botHelper;
     private final TTSUtil ttsUtil;
-
+    private final OCRUtil ocrUtil;
 
     @GroupMessageHandler
     @MessageHandlerFilter(at = AtEnum.NEED)
@@ -70,7 +72,9 @@ public class AiPlugin {
         AiHandler aiHandler = aiHandlerSelector.get(groupId);
 
         String text = getText(event.getArrayMsg());
-        log.info("问题：{}", text);
+        text += ShiroUtils.getMsgImgUrlList(event.getArrayMsg()).stream().map(ocrUtil::baidu).collect(Collectors.joining(
+                "\n"));
+        log.info("问题：{} ", text);
 
         // 当前用户的会话ID
         String conversationId = groupId + "::" + event.getUserId();

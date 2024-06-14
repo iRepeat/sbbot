@@ -37,7 +37,7 @@ public class OCRUtil {
 
             JSONArray wordsResult = res.getJSONArray("words_result");
             return wordsResult.toList().stream().map(jsonObject -> ((HashMap<?, ?>) jsonObject).get(
-                    "words")).map(Object::toString).collect(Collectors.joining("\n"));
+                    "words")).map(Object::toString).collect(Collectors.joining("，"));
         } catch (JSONException e) {
             log.info("baidu ocr error: ", e);
             return StringUtils.EMPTY;
