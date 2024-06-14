@@ -68,6 +68,12 @@ shiro:
       - 123456789
       - 987654321
     enable: true
+    ocr:
+      baidu:
+        api-key: xxx
+        app-id: xxx
+        secret-key: xxx
+        accurate: false
 
   interceptor: com.zh.sbbot.interceptor.CustomInterceptor
   plugin:
