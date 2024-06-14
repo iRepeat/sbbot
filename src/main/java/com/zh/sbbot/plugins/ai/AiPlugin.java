@@ -80,8 +80,11 @@ public class AiPlugin {
 
         botHelper.replyForGroup(event, response.getResult());
         if (Objects.equals(pluginAi.getTts(), 1)) {
-            String base64 = ttsUtil.generateToBase64(response.getResult());
-            bot.sendGroupMsg(groupId, ArrayMsgUtils.builder().voice("base64://" + base64).build(), false);
+//            String base64 = ttsUtil.generateToBase64(response.getResult());
+//            bot.sendGroupMsg(groupId, ArrayMsgUtils.builder().voice("base64://" + base64).build(), false);
+
+            String url = "http://ovoa.cc/api/dingzhen.php?message=" + response.getResult();
+            bot.sendGroupMsg(groupId, ArrayMsgUtils.builder().voice(url).build(), false);
         }
 
         if (response.isClearHistory()) {
