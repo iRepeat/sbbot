@@ -46,11 +46,11 @@ public class SystemPlugin {
     @MessageHandlerFilter(startWith = ".say", at = AtEnum.NOT_NEED)
     public void say(Bot bot, AnyMessageEvent event, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> {
-            List<ArrayMsg> msgList = ShiroUtils.rawToArrayMsg(s);
+            List<ArrayMsg> msgList = ShiroUtils.rawToArrayMsg(ShiroUtils.unescape(s));
             bot.sendMsg(event, BotUtil.adaptImgData(msgList), false);
         });
-
     }
+
 
     @AnyMessageHandler
     @MessageHandlerFilter(startWith = ".echo", at = AtEnum.NOT_NEED)
@@ -59,12 +59,6 @@ public class SystemPlugin {
                 ShiroUtils.unescape(s), true));
     }
 
-    @AnyMessageHandler
-    @MessageHandlerFilter(startWith = ".cq", at = AtEnum.NOT_NEED)
-    public void cq(Bot bot, AnyMessageEvent event, Matcher matcher) {
-        Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> bot.sendMsg(event,
-                ShiroUtils.unescape(s), false));
-    }
 
     @AnyMessageHandler
     @MessageHandlerFilter(cmd = ".up", at = AtEnum.NOT_NEED)
