@@ -10,6 +10,7 @@ import com.mikuac.shiro.enums.AtEnum;
 import com.mikuac.shiro.model.ArrayMsg;
 import com.zh.sbbot.annotations.Admin;
 import com.zh.sbbot.configs.SystemSetting;
+import com.zh.sbbot.repository.AliasRepository;
 import com.zh.sbbot.repository.DictRepository;
 import com.zh.sbbot.utils.BotHelper;
 import com.zh.sbbot.utils.BotUtil;
@@ -19,12 +20,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 管理员插件
@@ -41,12 +45,14 @@ public class SystemPlugin {
     private final JdbcTemplate jdbcTemplate;
     private final BotHelper botHelper;
     private final DictRepository dictRepository;
+    private final AliasRepository aliasRepository;
 
     @AnyMessageHandler
     @MessageHandlerFilter(startWith = ".say", at = AtEnum.NOT_NEED)
     public void say(Bot bot, AnyMessageEvent event, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> {
-            List<ArrayMsg> msgList = ShiroUtils.rawToArrayMsg(ShiroUtils.unescape(s));
+            s = BotUtil.adaptCQImage(ShiroUtils.unescape(s));
+            List<ArrayMsg> msgList = ShiroUtils.rawToArrayMsg(s);
             bot.sendMsg(event, BotUtil.adaptImgData(msgList), false);
         });
     }
@@ -137,24 +143,74 @@ public class SystemPlugin {
     @MessageHandlerFilter(startWith = ".set", at = AtEnum.NOT_NEED)
     public void set(AnyMessageEvent event, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> {
-            String[] params = s.split(" ", 2);
-            dictRepository.setValue(ShiroUtils.unescape(params[0]), ShiroUtils.unescape(params[1]));
-            botHelper.reply(event, "设置成功！");
+            Matcher kv = Pattern.compile("^(\\S+)\\s+(.+)$").matcher(s);
+            if (kv.find()) {
+                String key = ShiroUtils.unescape(kv.group(1));
+                String value = ShiroUtils.unescape(kv.group(2));
+                dictRepository.setValue(key, value);
+                botHelper.reply(event, "设置成功！" + key + " = " + value);
+            }
         });
     }
 
     @AnyMessageHandler
     @MessageHandlerFilter(startWith = ".get", at = AtEnum.NOT_NEED)
     public void get(AnyMessageEvent event, Matcher matcher) {
-        String s = BotUtil.getParam(matcher);
-        if (StringUtils.isNotBlank(s)) {
-            s = ShiroUtils.unescape(s);
-            String value = dictRepository.getValue(s);
-            botHelper.reply(event, s + " = " + value);
-        } else {
-            List<String> keys = dictRepository.getAllKeys();
-            botHelper.reply(event, "所有key：\n" + String.join("\n", keys));
-        }
+        Optional.ofNullable(BotUtil.getParam(matcher)).ifPresentOrElse(param -> {
+            String unescapedParam = ShiroUtils.unescape(param);
+            String dictValue = dictRepository.getValue(unescapedParam);
+            String aliasValue = aliasRepository.getValue(unescapedParam);
+            StringJoiner responseJoiner = new StringJoiner("\n");
+
+            if (StringUtils.isNotBlank(dictValue)) {
+                responseJoiner.add("【dict】")
+                        .add(unescapedParam + " = " + dictValue);
+            }
+            if (StringUtils.isNotBlank(aliasValue)) {
+                responseJoiner.add("【alias】")
+                        .add(unescapedParam + " = " + aliasValue);
+            }
+            if (responseJoiner.length() == 0) {
+                responseJoiner.add("无数据");
+            }
+            botHelper.reply(event, responseJoiner.toString().trim());
+        }, () -> {
+            List<String> dictKeys = dictRepository.getAllKeys();
+            List<String> aliasKeys = aliasRepository.getAllKeys();
+            StringJoiner responseJoiner = new StringJoiner("\n");
+
+            if (!CollectionUtils.isEmpty(dictKeys)) {
+                responseJoiner.add("【dict】")
+                        .add(String.join("\n", dictKeys));
+            }
+            if (!CollectionUtils.isEmpty(aliasKeys)) {
+                responseJoiner.add("【alias】")
+                        .add(String.join("\n", aliasKeys));
+            }
+            if (responseJoiner.length() == 0) {
+                responseJoiner.add("无数据");
+            }
+            botHelper.reply(event, responseJoiner.toString().trim());
+        });
+    }
+
+
+    @AnyMessageHandler
+    @MessageHandlerFilter(startWith = ".alias", at = AtEnum.NOT_NEED)
+    public void aliSet(AnyMessageEvent event, Matcher matcher) {
+        Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> {
+            Matcher kv = Pattern.compile("^(\\S+)\\s+(.+)$").matcher(s);
+            if (kv.find()) {
+                String key = ShiroUtils.unescape(kv.group(1));
+                if (key.contains("$")) {
+                    botHelper.reply(event, "key不能包含$");
+                    return;
+                }
+                String value = ShiroUtils.unescape(kv.group(2));
+                aliasRepository.setValue(key, value);
+                botHelper.reply(event, "别名设置成功！“%s” => “%s”".formatted(key, value.replace("$", "【参数】")));
+            }
+        });
     }
 
 
