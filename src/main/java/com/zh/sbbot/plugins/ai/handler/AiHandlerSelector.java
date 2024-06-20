@@ -48,7 +48,7 @@ public class AiHandlerSelector implements ApplicationContextAware {
     }
 
     public AiHandler getDefault() {
-        String defaultAIVendor = dictRepository.getValue(DictKey.PLUGIN_AI_DEFAULT);
+        String defaultAIVendor = dictRepository.get(DictKey.PLUGIN_AI_DEFAULT);
         return get(defaultAIVendor);
     }
 

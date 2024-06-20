@@ -52,11 +52,11 @@ public class CustomInterceptor implements BotMessageEventInterceptor {
     }
 
     private String getMatchingValue(String rawMessage) {
-        String[] messageParts = Optional.ofNullable(rawMessage).map(s -> s.split("\\$")).orElse(new String[0]);
+        String[] messageParts = Optional.ofNullable(rawMessage).map(s -> s.trim().split("\\$")).orElse(new String[0]);
         if (messageParts.length == 0) {
             return null;
         }
-        String value = aliasRepository.getValue(messageParts[0]);
+        String value = aliasRepository.get(messageParts[0].trim());
         if (value == null) {
             return null;
         }

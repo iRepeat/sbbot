@@ -22,10 +22,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -147,8 +144,13 @@ public class SystemPlugin {
             if (kv.find()) {
                 String key = ShiroUtils.unescape(kv.group(1));
                 String value = ShiroUtils.unescape(kv.group(2));
-                dictRepository.setValue(key, value);
-                botHelper.reply(event, "设置成功！" + key + " = " + value);
+                if (Objects.equals(value, "del")) {
+                    dictRepository.setOrRemove(key, null);
+                    botHelper.reply(event, "移除(" + key + ")成功！");
+                } else {
+                    dictRepository.setOrRemove(key, value);
+                    botHelper.reply(event, "设置成功！" + key + " = " + value);
+                }
             }
         });
     }
@@ -158,8 +160,8 @@ public class SystemPlugin {
     public void get(AnyMessageEvent event, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher)).ifPresentOrElse(param -> {
             String unescapedParam = ShiroUtils.unescape(param);
-            String dictValue = dictRepository.getValue(unescapedParam);
-            String aliasValue = aliasRepository.getValue(unescapedParam);
+            String dictValue = dictRepository.get(unescapedParam);
+            String aliasValue = aliasRepository.get(unescapedParam);
             StringJoiner responseJoiner = new StringJoiner("\n");
 
             if (StringUtils.isNotBlank(dictValue)) {
@@ -175,8 +177,8 @@ public class SystemPlugin {
             }
             botHelper.reply(event, responseJoiner.toString().trim());
         }, () -> {
-            List<String> dictKeys = dictRepository.getAllKeys();
-            List<String> aliasKeys = aliasRepository.getAllKeys();
+            List<String> dictKeys = dictRepository.getAll();
+            List<String> aliasKeys = aliasRepository.getAll();
             StringJoiner responseJoiner = new StringJoiner("\n");
 
             if (!CollectionUtils.isEmpty(dictKeys)) {
@@ -207,8 +209,13 @@ public class SystemPlugin {
                     return;
                 }
                 String value = ShiroUtils.unescape(kv.group(2));
-                aliasRepository.setValue(key, value);
-                botHelper.reply(event, "别名设置成功！“%s” => “%s”".formatted(key, value.replace("$", "【参数】")));
+                if (Objects.equals(value, "del")) {
+                    aliasRepository.setOrRemove(key, null);
+                    botHelper.reply(event, "移除(" + key + ")成功！");
+                } else {
+                    aliasRepository.setOrRemove(key, value);
+                    botHelper.reply(event, "别名设置成功！“%s” => “%s”".formatted(key, value.replace("$", "【参数】")));
+                }
             }
         });
     }

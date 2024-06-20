@@ -22,7 +22,7 @@ public class StatusChangeEvent extends CoreEvent {
     @Override
     public void online(Bot bot) {
         log.info("bot已上线：{}", bot.getSelfId());
-        Optional.ofNullable(dictRepository.getValue(DictKey.PLUGIN_EVENT_RECEIVE_USER, Long.class))
+        Optional.ofNullable(dictRepository.get(DictKey.PLUGIN_EVENT_RECEIVE_USER, Long.class))
                 .ifPresent(userId -> bot.sendPrivateMsg(userId, "我上线啦～", false));
     }
 

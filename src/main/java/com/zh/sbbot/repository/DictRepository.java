@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -23,18 +24,21 @@ public class DictRepository {
     private final JdbcTemplate jdbcTemplate;
 
     /**
-     * 设置键值对
-     * 存在就覆盖，不存在就创建
+     * 设置/移除键值对
      */
-    public void setValue(String key, Object value) {
-        this.jdbcTemplate.update("INSERT OR REPLACE INTO dict (key, value) VALUES (?,?)", key,
-                value instanceof String ? value : JSON.toJSONString(value));
+    public void setOrRemove(String key, Object value) {
+        if (value == null || (value instanceof String) && StringUtils.isBlank((String) value)) {
+            this.jdbcTemplate.update("DELETE from dict where `key` = ?", key);
+        } else {
+            this.jdbcTemplate.update("INSERT OR REPLACE INTO dict (key, value) VALUES (?,?)", key,
+                    value instanceof String ? value : JSON.toJSONString(value));
+        }
     }
 
     /**
      * 获取键值对
      */
-    public String getValue(String key) {
+    public String get(String key) {
         try {
             return this.jdbcTemplate.queryForObject("SELECT value FROM dict WHERE key = ?", String.class, key);
         } catch (IncorrectResultSizeDataAccessException e) {
@@ -47,8 +51,8 @@ public class DictRepository {
      * 获取指定类型的值
      */
     @SuppressWarnings("unchecked")
-    public <T> T getValue(String key, Class<T> type) {
-        String value = getValue(key);
+    public <T> T get(String key, Class<T> type) {
+        String value = get(key);
         if (value == null) return null;
         if (type.equals(String.class)) return (T) value;
         try {
@@ -62,7 +66,7 @@ public class DictRepository {
     /**
      * 获取所有的key
      */
-    public List<String> getAllKeys() {
+    public List<String> getAll() {
         return this.jdbcTemplate.queryForList("SELECT `key` FROM dict", String.class);
     }
 

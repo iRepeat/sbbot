@@ -36,7 +36,7 @@ public class PluginAiRepository {
      */
     public void initTable() {
         jdbcTemplate.execute("DROP TABLE IF EXISTS plugin_ai");
-        String createTableSql = dictRepository.getValue(DictKey.PLUGIN_AI_CREATE_SQL);
+        String createTableSql = dictRepository.get(DictKey.PLUGIN_AI_CREATE_SQL);
         jdbcTemplate.execute(createTableSql);
     }
 

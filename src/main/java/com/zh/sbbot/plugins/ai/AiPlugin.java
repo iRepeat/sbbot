@@ -72,6 +72,12 @@ public class AiPlugin {
                 "\n"));
         log.info("问题：{} ", text);
 
+        // 不允许问题为空
+        if (StringUtils.isBlank(text)) {
+            botHelper.replyForGroup(event, "?");
+            return;
+        }
+
         // 当前用户的会话ID
         String conversationId = groupId + "::" + event.getUserId();
 

@@ -30,7 +30,7 @@ public class TTSUtil {
         String path = "./tts";
 
         String finalName = Optional.ofNullable(dictRepository)
-                .map(repo -> repo.getValue(DictKey.TTS_NAME))
+                .map(repo -> repo.get(DictKey.TTS_NAME))
                 .filter(StringUtils::isNotBlank)
                 .orElse(defaultShortName);
 

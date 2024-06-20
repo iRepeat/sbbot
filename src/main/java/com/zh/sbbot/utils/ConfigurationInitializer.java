@@ -34,11 +34,11 @@ public abstract class ConfigurationInitializer implements CommandLineRunner {
 
         for (Field field : this.getClass().getSuperclass().getDeclaredFields()) {
             String key = prefix + "." + field.getName();
-            Object value = dictRepository.getValue(key, field.getType());
+            Object value = dictRepository.get(key, field.getType());
             if (value == null) {
                 // 将驼峰式命名转换为短线式命名：如apiKey => api-key
                 key = prefix + "." + field.getName().replaceAll("([a-z])([A-Z])", "$1-$2").toLowerCase();
-                value = dictRepository.getValue(key, field.getType());
+                value = dictRepository.get(key, field.getType());
                 if (value == null) {
                     continue;
                 }
