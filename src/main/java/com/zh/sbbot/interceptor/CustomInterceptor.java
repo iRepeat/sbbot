@@ -60,12 +60,12 @@ public class CustomInterceptor implements BotMessageEventInterceptor {
         if (value == null) {
             return null;
         }
-        if (StringUtils.countMatches(value, "$") != messageParts.length - 1) {
+        if (StringUtils.countMatches(value, "【参数】") != messageParts.length - 1) {
             log.info("matched alias: [{}] but parameter size is not equal, message: [{}]", value, rawMessage);
             return null;
         }
         for (int i = 1; i < messageParts.length; i++) {
-            value = value.replaceFirst("\\$", messageParts[i]);
+            value = value.replaceFirst("【参数】", messageParts[i]);
         }
         return value;
     }

@@ -204,8 +204,8 @@ public class SystemPlugin {
             Matcher kv = Pattern.compile("^(\\S+)\\s+(.+)$").matcher(s);
             if (kv.find()) {
                 String key = ShiroUtils.unescape(kv.group(1));
-                if (key.contains("$")) {
-                    botHelper.reply(event, "key不能包含$");
+                if (key.contains("【参数】")) {
+                    botHelper.reply(event, "key不能包含【参数】");
                     return;
                 }
                 String value = ShiroUtils.unescape(kv.group(2));
@@ -214,7 +214,7 @@ public class SystemPlugin {
                     botHelper.reply(event, "移除(" + key + ")成功！");
                 } else {
                     aliasRepository.setOrRemove(key, value);
-                    botHelper.reply(event, "别名设置成功！“%s” => “%s”".formatted(key, value.replace("$", "【参数】")));
+                    botHelper.reply(event, "别名设置成功！“%s” => “%s”".formatted(key, value));
                 }
             }
         });
