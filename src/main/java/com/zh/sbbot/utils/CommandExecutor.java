@@ -2,9 +2,11 @@ package com.zh.sbbot.utils;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.exec.*;
+import org.apache.commons.io.IOUtils;
 
-import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class CommandExecutor {
@@ -12,31 +14,24 @@ public class CommandExecutor {
 
     @SneakyThrows
     public static String execute(String command, long timeout) {
-        CommandLine commandLine = CommandLine.parse(command);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
+        ProcessBuilder processBuilder = new ProcessBuilder(List.of("sh", "-c", command));
+        processBuilder.redirectErrorStream(true);
 
-        PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, errorStream);
-        Executor executor = new DefaultExecutor();
-        executor.setStreamHandler(streamHandler);
+        Process process = processBuilder.start();
 
-        // 设置Watchdog监视器以实施超时
-        ExecuteWatchdog watchdog = new ExecuteWatchdog(timeout);
-        executor.setWatchdog(watchdog);
+        if (!process.waitFor(timeout, TimeUnit.MILLISECONDS)) {
+            process.destroy();
+            throw new RuntimeException("Command timed out");
+        }
 
-        try {
-            log.info("Executing command: " + commandLine);
-            int exitValue = executor.execute(commandLine);
-            if (exitValue == 0) {
-                return outputStream.toString().trim();
-            } else {
-                throw new RuntimeException("Command failed with error: " + errorStream);
-            }
-        } catch (ExecuteException e) {
-            if (watchdog.killedProcess()) {
-                throw new RuntimeException("The process timeout and was killed.");
-            }
-            throw e;
+        int exitValue = process.exitValue();
+        if (exitValue == 0) {
+            return IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8).trim();
+        } else {
+            throw new RuntimeException("Command failed [" + exitValue + "] with error: " + IOUtils.toString(process.getErrorStream(),
+                    StandardCharsets.UTF_8));
         }
     }
+
+
 }
