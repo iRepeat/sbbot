@@ -26,4 +26,8 @@ public class SystemSetting extends ConfigurationInitializer {
      */
     private boolean enable = true;
 
+    /**
+     * 图片域名适配列表。匹配域名的图片会使用base64发送
+     */
+    private String[] adaptImageHost;
 }

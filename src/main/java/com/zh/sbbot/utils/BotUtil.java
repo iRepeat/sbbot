@@ -8,12 +8,15 @@ import com.mikuac.shiro.model.ArrayMsg;
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.hc.client5.http.utils.URIUtils;
 
+import java.net.URI;
+import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -54,29 +57,6 @@ public class BotUtil {
                 .filter(it -> MsgTypeEnum.text == it.getType())
                 .map(it -> it.getData().get("text"))
                 .collect(Collectors.joining(join)).trim();
-    }
-
-    /**
-     * 由于当前lagrange框架无法发送某些域名的图片，因此有了这个适配方法。
-     * <p>
-     * 处理图片消息，将发送图片的方式由url转为base64
-     *
-     * @param arrayMsgList 包含“图片”类型的消息链
-     * @return 原消息链
-     */
-    public static List<ArrayMsg> adaptImgData(List<ArrayMsg> arrayMsgList) {
-        arrayMsgList.forEach(arrayMsg -> {
-            if (arrayMsg.getType().equals(MsgTypeEnum.image)
-                    && StringUtils.isNotBlank(arrayMsg.getData().getOrDefault("file", null))) {
-                String file = arrayMsg.getData().get("file");
-                if (file.startsWith("http://") || file.startsWith("https://")) {
-                    String base64Image = DownloadUtil.downloadIntoMemory(file);
-                    arrayMsg.getData().put("file", "base64://" + base64Image);
-                }
-            }
-
-        });
-        return arrayMsgList;
     }
 
     /**

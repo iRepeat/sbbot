@@ -74,6 +74,7 @@ shiro:
         app-id: xxx
         secret-key: xxx
         accurate: false
+    adapt-image-host: multimedia.nt.qq.com.cn
 
   interceptor: com.zh.sbbot.interceptor.CustomInterceptor
   plugin:

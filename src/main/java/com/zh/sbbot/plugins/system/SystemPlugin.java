@@ -50,7 +50,7 @@ public class SystemPlugin {
         Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> {
             s = BotUtil.adaptCQImage(ShiroUtils.unescape(s));
             List<ArrayMsg> msgList = ShiroUtils.rawToArrayMsg(s);
-            bot.sendMsg(event, BotUtil.adaptImgData(msgList), false);
+            bot.sendMsg(event, botHelper.adaptImgData(msgList), false);
         });
     }
 
