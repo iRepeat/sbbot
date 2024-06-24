@@ -3,6 +3,7 @@ package com.zh.sbbot.plugins.system;
 import com.mikuac.shiro.annotation.AnyMessageHandler;
 import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
+import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
@@ -54,6 +55,15 @@ public class SystemPlugin {
         });
     }
 
+    @AnyMessageHandler
+    @MessageHandlerFilter(startWith = ".json", at = AtEnum.NOT_NEED)
+    public void json(Bot bot, AnyMessageEvent event, Matcher matcher) {
+        Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> {
+            List<ArrayMsg> json = ArrayMsgUtils.builder().json(ShiroUtils.unescape(s)).build();
+            bot.sendMsg(event, json, false);
+        });
+    }
+
 
     @AnyMessageHandler
     @MessageHandlerFilter(startWith = ".echo", at = AtEnum.NOT_NEED)
@@ -83,7 +93,7 @@ public class SystemPlugin {
 
     @AnyMessageHandler
     @MessageHandlerFilter(startWith = ".exec", at = AtEnum.NOT_NEED)
-    public void exec(AnyMessageEvent event, Matcher matcher) {
+    public void exec(AnyMessageEvent event, Bot bot, Matcher matcher) {
         String param = BotUtil.getParam(matcher);
         if (StringUtils.isBlank(param)) {
             botHelper.reply(event, "请给定命令");
@@ -95,7 +105,13 @@ public class SystemPlugin {
 
         try {
             String result = CommandExecutor.execute(param, 10000);
-            botHelper.reply(event, StringUtils.isBlank(result) ? "（命令返回空）" : result);
+            if (StringUtils.isBlank(result)) botHelper.reply(event, "（命令返回空）");
+            else if (result.trim().startsWith("{\"app\"")) {
+                log.info("发送json数据：{}", result);
+                bot.sendMsg(event, ArrayMsgUtils.builder().json(result).build(), false);
+            } else {
+                botHelper.reply(event, result);
+            }
         } catch (Exception e) {
             log.error("执行命令失败！", e);
             botHelper.reply(event, "执行命令失败！\n" + e.getMessage());
