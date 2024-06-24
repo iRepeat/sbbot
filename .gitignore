@@ -36,3 +36,4 @@ build/
 application-local.yaml
 *.db
 /tts
+/src/main/resources/maven.properties

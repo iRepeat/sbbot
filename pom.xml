@@ -126,7 +126,72 @@
                     </excludes>
                 </configuration>
             </plugin>
+
+            <!-- 加载外部属性-->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <file>src/main/resources/maven.properties</file>
+                            </files>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <!-- 上传到远端-->
+                    <execution>
+                        <id>upload-file</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>scp</executable>
+                            <arguments>
+                                <argument>-i</argument>
+                                <argument>${ssh.key.path}</argument>
+                                <argument>${local.path}</argument>
+                                <argument>${remote.user}@${remote.address}:${remote.path}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <!-- optional: 执行重启sbbot-->
+                    <execution>
+                        <id>restart-sbbot</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>ssh</executable>
+                            <arguments>
+                                <argument>-i</argument>
+                                <argument>${ssh.key.path}</argument>
+                                <argument>${remote.user}@${remote.address}</argument>
+                                <argument>${remote.command}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
+
     </build>
+
 
 </project>
