@@ -1,40 +1,33 @@
 package com.zh.sbbot.plugins.push;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.Nonnull;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 
-@Getter
-enum MsgType {
-    PRIVATE,
-    GROUP
-}
 
 @Data
-public class SimplePushModel {
+@NoArgsConstructor
+public class SimpleMsgModel {
     /**
-     * 消息类型 {@link MsgType}
+     * 群组id（为空表示私聊消息）
      */
-    private String type;
+    private Long group;
 
     /**
-     * 目标用户或者群组
+     * 目标用户
      */
-    @Nonnull
-    private Long target;
+    private Long user;
 
     /**
      * 文本。可接受CQ码
      */
-    @Nonnull
     private String text;
 
     /**
      * 机器人id
      */
-    @Nonnull
     private Long bot;
 
     @Override

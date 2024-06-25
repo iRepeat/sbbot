@@ -41,7 +41,7 @@ public class BotHelper {
     /**
      * 默认bot
      */
-    public Bot defaultBot(){
+    public Bot defaultBot() {
         return botContainer.robots.get(systemSetting.getDefaultBot());
     }
 
@@ -52,8 +52,7 @@ public class BotHelper {
      * @param text  回复内容
      */
     public void reply(AnyMessageEvent event, String text) {
-        String msg = MsgUtils.builder()
-                .reply(event.getMessageId())
+        String msg = (event.getMessageId() == null ? MsgUtils.builder() : MsgUtils.builder().reply(event.getMessageId()))
                 .text(text)
                 .text("\n")
                 .at(event.getUserId())
@@ -69,8 +68,7 @@ public class BotHelper {
      * @param text  回复内容
      */
     public void replyForGroup(GroupMessageEvent event, String text) {
-        String msg = MsgUtils.builder()
-                .reply(event.getMessageId())
+        String msg = (event.getMessageId() == null ? MsgUtils.builder() : MsgUtils.builder().reply(event.getMessageId()))
                 .text(text)
                 .text("\n")
                 .at(event.getUserId())

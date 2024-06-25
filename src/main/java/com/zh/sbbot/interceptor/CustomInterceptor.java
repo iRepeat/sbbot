@@ -1,6 +1,5 @@
 package com.zh.sbbot.interceptor;
 
-import com.alibaba.fastjson2.JSONObject;
 import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.core.BotMessageEventInterceptor;
@@ -37,8 +36,15 @@ public class CustomInterceptor implements BotMessageEventInterceptor {
         String value = getMatchingValue(unescaped);
         if (StringUtils.isNotBlank(value)) {
             log.info("replace: [{}] => [{}] ", unescaped, value);
-            event.setRawMessage(value);
-            event.setMessage(JSONObject.toJSONString(ShiroUtils.rawToArrayMsg(value)));
+            if (event.getRawMessage() != null) {
+                event.setRawMessage(value);
+            }
+            if (event.getMessage() != null) {
+                event.setMessage(value);
+            }
+            if (event.getArrayMsg() != null) {
+                event.setArrayMsg(ShiroUtils.rawToArrayMsg(value));
+            }
             // 别名命令不检查管理员权限
             bot.setAnnotationHandler(container.getAnnotationHandler());
         }
