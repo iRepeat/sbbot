@@ -21,6 +21,11 @@ public class SystemSetting extends ConfigurationInitializer {
     private Long[] superUser;
 
     /**
+     * 默认bot
+     */
+    private Long defaultBot;
+
+    /**
      * 全局bot开关。
      * 可由".up/.down"命令临时切换开关状态。
      */

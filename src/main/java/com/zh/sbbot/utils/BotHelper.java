@@ -39,6 +39,13 @@ public class BotHelper {
     }
 
     /**
+     * 默认bot
+     */
+    public Bot defaultBot(){
+        return botContainer.robots.get(systemSetting.getDefaultBot());
+    }
+
+    /**
      * 快速回复（文本）
      *
      * @param event 消息事件
@@ -51,8 +58,7 @@ public class BotHelper {
                 .text("\n")
                 .at(event.getUserId())
                 .build();
-        Bot bot = botContainer.robots.get(event.getSelfId());
-        bot.sendMsg(event, msg, false);
+        defaultBot().sendMsg(event, msg, false);
     }
 
 
@@ -69,8 +75,7 @@ public class BotHelper {
                 .text("\n")
                 .at(event.getUserId())
                 .build();
-        Bot bot = botContainer.robots.get(event.getSelfId());
-        bot.sendGroupMsg(event.getGroupId(), event.getSender().getUserId(), msg, false);
+        defaultBot().sendGroupMsg(event.getGroupId(), event.getSender().getUserId(), msg, false);
     }
 
 
