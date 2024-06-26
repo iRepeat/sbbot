@@ -11,8 +11,10 @@ import com.mikuac.shiro.dto.action.common.ActionList;
 import com.mikuac.shiro.dto.action.common.MsgId;
 import com.mikuac.shiro.dto.action.response.FriendInfoResp;
 import com.mikuac.shiro.dto.action.response.GroupInfoResp;
-import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
+import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.handler.injection.InjectionHandler;
+import com.zh.sbbot.utils.AnnotationHandlerContainer;
+import com.zh.sbbot.utils.BotUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -31,6 +33,7 @@ public class BotController {
     private final BotContainer botContainer;
     private final InjectionHandler injectionHandler;
     private final EventUtils eventUtils;
+    private final AnnotationHandlerContainer annotationHandlerContainer;
 
     private static ResponseEntity<String> sendPrivate(SimpleMsgModel model, Bot bot) {
         ActionList<FriendInfoResp> friendList = bot.getFriendList();
@@ -83,7 +86,7 @@ public class BotController {
             return ResponseEntity.badRequest().body("bot is illegal");
         }
         boolean isGroup = model.getGroup() != null;
-        String anyMessageEvent = """
+        String groupEventStr = """
                 {
                     "font": 0,
                     "message": "%s",
@@ -111,13 +114,21 @@ public class BotController {
                 model.getGroup()
         );
 
-        AnyMessageEvent event = JSONObject.parseObject(anyMessageEvent, AnyMessageEvent.class);
+        GroupMessageEvent event = JSONObject.parseObject(groupEventStr, GroupMessageEvent.class);
         event.setArrayMsg(ShiroUtils.rawToArrayMsg(model.getText()));
 
         // 执行消息过滤
         if (eventUtils.getInterceptor(bot.getBotMessageEventInterceptor()).preHandle(bot, event)) {
+            // 强制可执行管理员命令
+            if (1 == model.getForceSu()) {
+                bot.setAnnotationHandler(annotationHandlerContainer.getAnnotationHandler());
+            }
             // 执行消息事件处理
-            injectionHandler.invokeAnyMessage(bot, event);
+            injectionHandler.invokeAnyMessage(bot, BotUtil.castToAnyMessageEvent(event));
+            if (isGroup) {
+                // 群聊事件还要执行群聊消息处理
+                injectionHandler.invokeGroupMessage(bot, event);
+            }
         }
 
         return ResponseEntity.ok(JSONObject.toJSONString(event, JSONWriter.Feature.PrettyFormat));
