@@ -10,6 +10,7 @@ import com.mikuac.shiro.dto.action.common.ActionData;
 import com.mikuac.shiro.dto.action.common.ActionList;
 import com.mikuac.shiro.dto.action.common.MsgId;
 import com.mikuac.shiro.dto.action.response.FriendInfoResp;
+import com.mikuac.shiro.dto.action.response.GetMsgResp;
 import com.mikuac.shiro.dto.action.response.GroupInfoResp;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.handler.injection.InjectionHandler;
@@ -86,35 +87,22 @@ public class BotController {
             return ResponseEntity.badRequest().body("bot is illegal");
         }
         boolean isGroup = model.getGroup() != null;
-        String groupEventStr = """
-                {
-                    "font": 0,
-                    "message": "%s",
-                    "raw_message": "%s",
-                    "message_type": "%s",
-                    "post_type": "message",
-                    "self_id": %s,
-                    "sender": {
-                        "nickname": "by invoker"
-                        "sex": "unknown",
-                        "user_id": %s
-                    },
-                    "time": %s,
-                    "user_id": %s,
-                    "group_id": %s,
-                }
-                """.formatted(
-                model.getText(),
-                model.getText(),
-                isGroup ? "group" : "private",
-                bot.getSelfId(),
-                model.getUser(),
-                System.currentTimeMillis() / 1000,
-                model.getUser(),
-                model.getGroup()
-        );
 
-        GroupMessageEvent event = JSONObject.parseObject(groupEventStr, GroupMessageEvent.class);
+        GroupMessageEvent event = new GroupMessageEvent();
+        event.setFont(0);
+        event.setMessage(model.getText());
+        event.setRawMessage(model.getText());
+        event.setMessageType(isGroup ? "group" : "private");
+        event.setPostType("message");
+        event.setSelfId(bot.getSelfId());
+        GroupMessageEvent.GroupSender sender = new GroupMessageEvent.GroupSender();
+        sender.setNickname("by invoker");
+        sender.setSex("unknown");
+        sender.setUserId(model.getUser());
+        event.setSender(sender);
+        event.setTime(System.currentTimeMillis() / 1000);
+        event.setUserId(model.getUser());
+        event.setGroupId(model.getGroup());
         event.setArrayMsg(ShiroUtils.rawToArrayMsg(model.getText()));
 
         // 执行消息过滤
