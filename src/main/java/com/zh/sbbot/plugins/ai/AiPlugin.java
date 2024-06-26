@@ -153,6 +153,7 @@ public class AiPlugin {
                 break;
             case "init":
                 AiHandler defaultAIHandler = aiHandlerSelector.getDefault();
+                aiHandlerSelector.set(groupId, defaultAIHandler.vendor());
                 pluginAiRepository.init(groupId, defaultAIHandler.defaultModel(), defaultAIHandler.vendor());
                 botHelper.reply(event, "初始化配置成功：%s，平台：%s，模型：%s".formatted(groupId,
                         defaultAIHandler.vendor(), defaultAIHandler.defaultModel()));
@@ -175,6 +176,7 @@ public class AiPlugin {
                 break;
             case "set":
                 int i = pluginAiRepository.update(split[1], split[2], groupId);
+                if (split[1].equals("vendor")) aiHandlerSelector.set(groupId, split[2]);
                 PluginAi config = pluginAiRepository.findOne(groupId);
                 botHelper.reply(event, "配置更新成功，影响行数：%s！当前AI配置：%s".formatted(i, config));
                 break;
