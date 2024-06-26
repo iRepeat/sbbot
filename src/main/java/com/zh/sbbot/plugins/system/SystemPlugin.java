@@ -191,7 +191,7 @@ public class SystemPlugin {
             if (responseJoiner.length() == 0) {
                 responseJoiner.add("无数据");
             }
-            botHelper.reply(event, responseJoiner.toString().trim());
+            botHelper.reply(event, responseJoiner.toString().trim(), true);
         }, () -> {
             List<String> dictKeys = dictRepository.getAll();
             List<String> aliasKeys = aliasRepository.getAll();

@@ -46,36 +46,62 @@ public class BotHelper {
     }
 
     /**
-     * 快速回复（文本）
+     * 快速回复
+     *
+     * @param event      消息事件
+     * @param text       回复内容
+     * @param autoEscape 是否解析CQ码
+     */
+    public void reply(AnyMessageEvent event, String text, boolean autoEscape) {
+        // 创建MsgUtils实例，根据是否有消息ID来决定是否需要reply
+        MsgUtils msgUtils = MsgUtils.builder();
+        if (!autoEscape && event.getMessageId() != null) {
+            msgUtils.reply(event.getMessageId());
+        }
+
+        // 构建消息内容，根据是否有用户ID来决定是否需要@用户
+        msgUtils.text(text);
+        if (!autoEscape && event.getSender().getUserId() != null) {
+            msgUtils.text("\n").at(event.getSender().getUserId());
+        }
+        String msg = msgUtils.build();
+
+        // 发送群消息
+        defaultBot().sendMsg(event, msg, autoEscape);
+    }
+
+    /**
+     * 快速回复，解析CQ码
      *
      * @param event 消息事件
      * @param text  回复内容
      */
     public void reply(AnyMessageEvent event, String text) {
-        String msg = (event.getMessageId() == null ? MsgUtils.builder() : MsgUtils.builder().reply(event.getMessageId()))
-                .text(text)
-                .text("\n")
-                .at(event.getUserId())
-                .build();
-        defaultBot().sendMsg(event, msg, false);
+        AnyMessageEvent anyMessageEvent = BotUtil.castToAnyMessageEvent(event);
+        reply(anyMessageEvent, text, false);
     }
 
+    /**
+     * 群消息快速回复
+     *
+     * @param event      消息事件
+     * @param text       回复内容
+     * @param autoEscape 是否解析CQ码
+     */
+    public void reply(GroupMessageEvent event, String text, boolean autoEscape) {
+        AnyMessageEvent anyMessageEvent = BotUtil.castToAnyMessageEvent(event);
+        reply(anyMessageEvent, text, autoEscape);
+    }
 
     /**
-     * 群消息快速回复（文本）
+     * 群消息快速回复，解析CQ码
      *
      * @param event 消息事件
      * @param text  回复内容
      */
-    public void replyForGroup(GroupMessageEvent event, String text) {
-        String msg = (event.getMessageId() == null ? MsgUtils.builder() : MsgUtils.builder().reply(event.getMessageId()))
-                .text(text)
-                .text("\n")
-                .at(event.getUserId())
-                .build();
-        defaultBot().sendGroupMsg(event.getGroupId(), event.getSender().getUserId(), msg, false);
+    public void reply(GroupMessageEvent event, String text) {
+        reply(event, text, false);
     }
-
 
     /**
      * 由于当前lagrange框架无法发送某些域名的图片，因此有了这个适配方法。

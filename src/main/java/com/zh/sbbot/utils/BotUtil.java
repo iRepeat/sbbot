@@ -2,21 +2,18 @@ package com.zh.sbbot.utils;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
+import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.enums.MsgTypeEnum;
 import com.mikuac.shiro.model.ArrayMsg;
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hc.client5.http.utils.URIUtils;
+import org.springframework.beans.BeanUtils;
 
-import java.net.URI;
-import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -97,6 +94,15 @@ public class BotUtil {
             log.debug("error to parse message: {}", message, e);
             return Collections.emptyList();
         }
+    }
+
+    /**
+     * GroupMessageEvent -> AnyMessageEvent
+     */
+    public static AnyMessageEvent castToAnyMessageEvent(GroupMessageEvent event) {
+        AnyMessageEvent target = new AnyMessageEvent();
+        BeanUtils.copyProperties(event, target);
+        return target;
     }
 }
 

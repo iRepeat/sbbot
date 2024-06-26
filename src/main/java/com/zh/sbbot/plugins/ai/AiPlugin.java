@@ -60,7 +60,7 @@ public class AiPlugin {
 
         // 群AI已禁用
         if (Objects.equals(pluginAi.getIsDisable(), 1)) {
-            botHelper.replyForGroup(event, "AI功能已关闭");
+            botHelper.reply(event, "AI功能已关闭");
             return;
         }
 
@@ -74,7 +74,7 @@ public class AiPlugin {
 
         // 不允许问题为空
         if (StringUtils.isBlank(text)) {
-            botHelper.replyForGroup(event, "?");
+            botHelper.reply(event, "?");
             return;
         }
 
@@ -105,7 +105,7 @@ public class AiPlugin {
         ChatResponse response = aiHandler.generateAnswer(pluginAi, text, conversationId);
         log.info("AI： {}", response);
 
-        botHelper.replyForGroup(event, response.getResult());
+        botHelper.reply(event, response.getResult());
         if (Objects.equals(pluginAi.getTts(), 1)) {
 //            String base64 = ttsUtil.generateToBase64(response.getResult());
 //            bot.sendGroupMsg(groupId, ArrayMsgUtils.builder().voice("base64://" + base64).build(), false);
@@ -115,7 +115,7 @@ public class AiPlugin {
         }
 
         if (response.isClearHistory()) {
-            botHelper.replyForGroup(event, "当前会话已结束，原因：" + response.getClearReason());
+            botHelper.reply(event, "当前会话已结束，原因：" + response.getClearReason());
         }
     }
 
@@ -137,7 +137,7 @@ public class AiPlugin {
 
         String param = BotUtil.getParam(matcher);
         if (StringUtils.isBlank(param)) {
-            botHelper.replyForGroup(event, usage);
+            botHelper.reply(event, usage);
             return;
         }
 
@@ -149,49 +149,49 @@ public class AiPlugin {
         switch (action) {
             case "reset":
                 pluginAiRepository.initTable();
-                botHelper.replyForGroup(event, "初始化表成功");
+                botHelper.reply(event, "初始化表成功");
                 break;
             case "init":
                 AiHandler defaultAIHandler = aiHandlerSelector.getDefault();
                 pluginAiRepository.init(groupId, defaultAIHandler.defaultModel(), defaultAIHandler.vendor());
-                botHelper.replyForGroup(event, "初始化配置成功：%s，平台：%s，模型：%s".formatted(groupId,
+                botHelper.reply(event, "初始化配置成功：%s，平台：%s，模型：%s".formatted(groupId,
                         defaultAIHandler.vendor(), defaultAIHandler.defaultModel()));
                 break;
             case "disable":
                 pluginAiRepository.disable(groupId);
-                botHelper.replyForGroup(event, "禁用成功：" + groupId);
+                botHelper.reply(event, "禁用成功：" + groupId);
                 break;
             case "enable":
                 pluginAiRepository.enable(groupId);
-                botHelper.replyForGroup(event, "启用成功：" + groupId);
+                botHelper.reply(event, "启用成功：" + groupId);
                 break;
             case "get":
                 PluginAi pluginAi = pluginAiRepository.findOne(groupId);
                 if (pluginAi == null) {
-                    botHelper.replyForGroup(event, "AI配置未初始化");
+                    botHelper.reply(event, "AI配置未初始化");
                 } else {
-                    botHelper.replyForGroup(event, "当前AI配置：%s".formatted(pluginAi));
+                    botHelper.reply(event, "当前AI配置：%s".formatted(pluginAi));
                 }
                 break;
             case "set":
                 int i = pluginAiRepository.update(split[1], split[2], groupId);
                 PluginAi config = pluginAiRepository.findOne(groupId);
-                botHelper.replyForGroup(event, "配置更新成功，影响行数：%s！当前AI配置：%s".formatted(i, config));
+                botHelper.reply(event, "配置更新成功，影响行数：%s！当前AI配置：%s".formatted(i, config));
                 break;
             case "!!":
             case "！！":
                 aiHandlerSelector.get(groupId).clearByPrefix(groupId.toString());
-                botHelper.replyForGroup(event, "记忆清除成功: " + groupId);
+                botHelper.reply(event, "记忆清除成功: " + groupId);
                 break;
             case "service":
                 // 切换当前群聊AI
                 AiHandler aiHandler = aiHandlerSelector.set(groupId, split[1]);
                 pluginAiRepository.switchAi(groupId, aiHandler.vendor(), aiHandler.defaultModel());
                 aiHandler.clearByPrefix(groupId.toString());
-                botHelper.replyForGroup(event, "群聊AI已切换：%s，模型：%s".formatted(aiHandler.vendor(), aiHandler.defaultModel()));
+                botHelper.reply(event, "群聊AI已切换：%s，模型：%s".formatted(aiHandler.vendor(), aiHandler.defaultModel()));
                 break;
             default:
-                botHelper.replyForGroup(event, "参数错误：“%s”\n%s".formatted(action, usage));
+                botHelper.reply(event, "参数错误：“%s”\n%s".formatted(action, usage));
                 break;
         }
 

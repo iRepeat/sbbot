@@ -55,8 +55,8 @@ public class BotController {
         if (StringUtils.isBlank(model.getText())) {
             return ResponseEntity.badRequest().body("text is empty");
         }
-        if (model.getUser() == null) {
-            return ResponseEntity.badRequest().body("user is null");
+        if (model.getUser() == null && model.getGroup() == null) {
+            return ResponseEntity.badRequest().body("user and group cannot both be empty");
         }
         Bot bot = model.getBot() == null ? null : botContainer.robots.get(model.getBot());
         if (bot == null) {
@@ -75,8 +75,8 @@ public class BotController {
         if (StringUtils.isBlank(model.getText())) {
             return ResponseEntity.badRequest().body("text is empty");
         }
-        if (model.getUser() == null) {
-            return ResponseEntity.badRequest().body("user is null");
+        if (model.getUser() == null && model.getGroup() == null) {
+            return ResponseEntity.badRequest().body("user and group cannot both be empty");
         }
         Bot bot = model.getBot() == null ? null : botContainer.robots.get(model.getBot());
         if (bot == null) {
