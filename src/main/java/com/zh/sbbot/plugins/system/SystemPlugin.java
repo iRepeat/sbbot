@@ -104,7 +104,7 @@ public class SystemPlugin {
         param = ShiroUtils.unescape(param);
 
         try {
-            String result = CommandExecutor.execute(param, 10000);
+            String result = CommandExecutor.execute(param, 30000);
             if (StringUtils.isBlank(result)) botHelper.reply(event, "（命令返回空）");
             else if (result.trim().startsWith("{\"app\"")) {
                 log.info("发送json数据：{}", result);
