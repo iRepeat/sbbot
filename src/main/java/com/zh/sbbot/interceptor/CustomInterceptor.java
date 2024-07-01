@@ -3,6 +3,7 @@ package com.zh.sbbot.interceptor;
 import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.core.BotMessageEventInterceptor;
+import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.dto.event.message.MessageEvent;
 import com.zh.sbbot.configs.SystemSetting;
 import com.zh.sbbot.repository.AliasRepository;
@@ -33,7 +34,7 @@ public class CustomInterceptor implements BotMessageEventInterceptor {
     public boolean preHandle(Bot bot, MessageEvent event) {
         // 判断是否是命令别名
         String unescaped = ShiroUtils.unescape(event.getRawMessage());
-        String value = getMatchingValue(unescaped);
+        String value = getMatchingValue(unescaped, event);
         if (StringUtils.isNotBlank(value)) {
             log.info("replace: [{}] => [{}] ", unescaped, value);
             if (event.getRawMessage() != null) {
@@ -57,7 +58,7 @@ public class CustomInterceptor implements BotMessageEventInterceptor {
         return List.of(".up", ".down").contains(event.getRawMessage()) || systemSetting.isEnable();
     }
 
-    private String getMatchingValue(String rawMessage) {
+    private String getMatchingValue(String rawMessage, MessageEvent event) {
         String[] messageParts = Optional.ofNullable(rawMessage).map(s -> s.trim().split("\\$")).orElse(new String[0]);
         if (messageParts.length == 0) {
             return null;
@@ -73,6 +74,12 @@ public class CustomInterceptor implements BotMessageEventInterceptor {
         for (int i = 1; i < messageParts.length; i++) {
             value = value.replaceFirst("【参数】", messageParts[i]);
         }
+        value = value.replace("【group】", event instanceof GroupMessageEvent ?
+                ((GroupMessageEvent) event).getGroupId().toString() : "0");
+        value = value.replace("【user】", event.getUserId() != null ?
+                event.getUserId().toString() : "0");
+        value = value.replace("【self】", event.getSelfId() != null ?
+                event.getSelfId().toString() : "0");
         return value;
     }
 

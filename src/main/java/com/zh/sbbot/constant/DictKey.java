@@ -5,4 +5,5 @@ public class DictKey {
     public static final String PLUGIN_AI_CREATE_SQL = "plugin.ai.create_sql";
     public static final String PLUGIN_EVENT_RECEIVE_USER = "plugin.event.receive_user";
     public static final String TTS_NAME = "tts.name";
+    public static final String PLUGIN_REPEAT_MSG_RULE = "plugin.repeat.msg.rule";
 }
