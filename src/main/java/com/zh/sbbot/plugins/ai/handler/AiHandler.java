@@ -14,6 +14,18 @@ public interface AiHandler {
     ChatResponse generateAnswer(PluginAi pluginAi, String text, String conversationId);
 
     /**
+     * 获取AI答案
+     *
+     * @param text     用户输入的文本
+     * @param pluginAi AI配置
+     */
+    default ChatResponse generateAnswer(PluginAi pluginAi, String text) {
+        ChatResponse chatResponse = generateAnswer(pluginAi, text, "temp");
+        clear("temp");
+        return chatResponse;
+    }
+
+    /**
      * 所属的AI厂商
      */
     String vendor();

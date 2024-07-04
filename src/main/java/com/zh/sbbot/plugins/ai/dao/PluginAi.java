@@ -66,6 +66,25 @@ public class PluginAi {
      */
     private Integer tts;
 
+    public static PluginAi defaultConfig(Long groupId) {
+        PluginAi pluginAi = new PluginAi();
+        pluginAi.setGroupId(groupId);
+        pluginAi.setSystemTemplate("你是一个很有用的群聊助手");
+        pluginAi.setModel("qwen-turbo");
+
+        pluginAi.setTemperature("0.9");
+        pluginAi.setIsDisable(0);
+        pluginAi.setMaxToken(1024);
+
+        pluginAi.setLastN(5);
+        pluginAi.setEnableSearch(1);
+        pluginAi.setVendor(VendorEnum.qwen.name());
+
+        pluginAi.setTopP("0.9");
+        pluginAi.setTts(0);
+        return pluginAi;
+    }
+
 
     @Override
     @SneakyThrows
