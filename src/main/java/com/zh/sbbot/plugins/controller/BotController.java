@@ -1,4 +1,4 @@
-package com.zh.sbbot.plugins.push;
+package com.zh.sbbot.plugins.controller;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
@@ -10,7 +10,6 @@ import com.mikuac.shiro.dto.action.common.ActionData;
 import com.mikuac.shiro.dto.action.common.ActionList;
 import com.mikuac.shiro.dto.action.common.MsgId;
 import com.mikuac.shiro.dto.action.response.FriendInfoResp;
-import com.mikuac.shiro.dto.action.response.GetMsgResp;
 import com.mikuac.shiro.dto.action.response.GroupInfoResp;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.handler.injection.InjectionHandler;

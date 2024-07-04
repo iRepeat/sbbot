@@ -1,8 +1,7 @@
-package com.zh.sbbot.plugins.push;
+package com.zh.sbbot.plugins.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 

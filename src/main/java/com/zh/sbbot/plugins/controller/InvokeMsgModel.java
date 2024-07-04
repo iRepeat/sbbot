@@ -1,4 +1,4 @@
-package com.zh.sbbot.plugins.push;
+package com.zh.sbbot.plugins.controller;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
