@@ -30,9 +30,27 @@ public class BotUtil {
      * 提取消息参数，解密base64
      */
     public static @Nullable String getParam(Matcher matcher) {
-        String param = Optional.ofNullable(matcher).map(m -> m.group(2)).map(String::trim).filter(StringUtils::isNotBlank).orElse(null);;
-        if (param != null && param.startsWith("【") && param.endsWith("】")) {
-            return new String(Base64.getDecoder().decode(param.replaceAll("【", "").replaceAll("】", ""))).trim();
+        return getParam(matcher, 2);
+    }
+
+    /**
+     * 提取消息参数，解密base64
+     */
+    public static @Nullable String getParam(Matcher matcher, int groupNo) {
+        String param = Optional.ofNullable(matcher).map(m -> m.group(groupNo)).map(String::trim).filter(StringUtils::isNotBlank).orElse(null);
+        return base64(param);
+    }
+
+    /**
+     * 消息base64编码/解码
+     */
+    public static String base64(String param) {
+        if (param != null) {
+            if (param.endsWith("【") && param.startsWith("】")) {
+                return new String(Base64.getDecoder().decode(param.replaceAll("【", "").replaceAll("】", ""))).trim();
+            } else if (param.startsWith("【") && param.endsWith("】")) {
+                return new String(Base64.getEncoder().encode(param.replaceAll("【", "").replaceAll("】", "").getBytes())).trim();
+            }
         }
         return param;
     }
