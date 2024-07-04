@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -26,10 +27,14 @@ public class BotUtil {
 
 
     /**
-     * 提取消息参数
+     * 提取消息参数，解密base64
      */
     public static @Nullable String getParam(Matcher matcher) {
-        return Optional.ofNullable(matcher).map(m -> m.group(2)).map(String::trim).filter(StringUtils::isNotBlank).orElse(null);
+        String param = Optional.ofNullable(matcher).map(m -> m.group(2)).map(String::trim).filter(StringUtils::isNotBlank).orElse(null);;
+        if (param != null && param.startsWith("【") && param.endsWith("】")) {
+            return new String(Base64.getDecoder().decode(param.replaceAll("【", "").replaceAll("】", ""))).trim();
+        }
+        return param;
     }
 
 

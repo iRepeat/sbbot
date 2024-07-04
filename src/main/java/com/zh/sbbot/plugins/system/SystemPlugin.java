@@ -26,7 +26,6 @@ import org.springframework.util.CollectionUtils;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * 管理员插件
@@ -156,10 +155,10 @@ public class SystemPlugin {
     @MessageHandlerFilter(startWith = ".set", at = AtEnum.NOT_NEED)
     public void set(AnyMessageEvent event, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> {
-            Matcher kv = Pattern.compile("^(\\S+)\\s+(.+)$").matcher(s);
-            if (kv.find()) {
-                String key = ShiroUtils.unescape(kv.group(1));
-                String value = ShiroUtils.unescape(kv.group(2));
+            int i = s.indexOf(' ');
+            if (i > -1){
+                String key = ShiroUtils.unescape(s.substring(0, i).trim());
+                String value = ShiroUtils.unescape(s.substring(i + 1).trim());
                 if (Objects.equals(value, "del")) {
                     dictRepository.setOrRemove(key, null);
                     botHelper.reply(event, "移除(" + key + ")成功！");
@@ -217,14 +216,14 @@ public class SystemPlugin {
     @MessageHandlerFilter(startWith = ".alias", at = AtEnum.NOT_NEED)
     public void aliSet(AnyMessageEvent event, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> {
-            Matcher kv = Pattern.compile("^(\\S+)\\s+(.+)$").matcher(s);
-            if (kv.find()) {
-                String key = ShiroUtils.unescape(kv.group(1));
+            int i = s.indexOf(' ');
+            if (i > -1){
+                String key = ShiroUtils.unescape(s.substring(0, i).trim());
                 if (key.contains("【参数】")) {
                     botHelper.reply(event, "key不能包含【参数】");
                     return;
                 }
-                String value = ShiroUtils.unescape(kv.group(2));
+                String value = ShiroUtils.unescape(s.substring(i + 1).trim());
                 if (Objects.equals(value, "del")) {
                     aliasRepository.setOrRemove(key, null);
                     botHelper.reply(event, "移除(" + key + ")成功！");
