@@ -11,7 +11,6 @@ import com.zh.sbbot.utils.BotUtil;
 import com.zh.sbbot.utils.TTSUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.regex.Matcher;
@@ -24,13 +23,6 @@ import java.util.regex.Matcher;
 public class VoicePlugin {
 
     private final TTSUtil ttsUtil;
-
-    @AnyMessageHandler
-    @MessageHandlerFilter(startWith = ".dz", at = AtEnum.NOT_NEED)
-    public void dz(Bot bot, AnyMessageEvent event, Matcher matcher) {
-        String url = "http://ovoa.cc/api/dingzhen.php?message=" + BotUtil.getParam(matcher);
-        bot.sendMsg(event, ArrayMsgUtils.builder().voice(url).build(), false);
-    }
 
     @AnyMessageHandler
     @MessageHandlerFilter(startWith = ".tts", at = AtEnum.NOT_NEED)
