@@ -12,9 +12,9 @@ import com.mikuac.shiro.model.ArrayMsg;
 import com.zh.sbbot.constant.DictKey;
 import com.zh.sbbot.plugins.ai.dao.PluginAi;
 import com.zh.sbbot.plugins.ai.dao.PluginAiRepository;
+import com.zh.sbbot.plugins.ai.handler.AiHandler;
 import com.zh.sbbot.plugins.ai.handler.AiHandlerSelector;
 import com.zh.sbbot.plugins.ai.support.ChatResponse;
-import com.zh.sbbot.plugins.ai.support.VendorEnum;
 import com.zh.sbbot.repository.DictRepository;
 import com.zh.sbbot.utils.BotUtil;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.mikuac.shiro.enums.MsgTypeEnum.*;
@@ -50,15 +51,14 @@ public class MessageRepeatPlugin {
             if (arrayMsg.getType().equals(text)) {
                 for (String word : list) {
                     if (arrayMsg.getData().get("text").endsWith(word)) {
-                        // 读取当前群组的配置
+                        AiHandler defaultHandler = aiHandlerSelector.getDefault();
+                        // 读取当前群组的配置。如果群聊没有配置，则使用默认配置
                         PluginAi pluginAi = Optional.ofNullable(pluginAiRepository.findOne(event.getGroupId()))
-                                .orElse(PluginAi.defaultConfig(event.getGroupId()));
-                        pluginAi.setVendor(VendorEnum.qianfan.name());
-                        pluginAi.setModel("ERNIE-4.0-8K-Preview");
-                        pluginAi.setSystemTemplate("你的职能是为用户的消息添加emoji，直接告诉用户处理结果");
-                        ChatResponse chatResponse = aiHandlerSelector.get(VendorEnum.qianfan.name()).generateAnswer(pluginAi
-                                , "用户的消息是：“" + BotUtil.getText(msg) + "”");
-                        if (!chatResponse.isClearHistory()) {
+                                .orElse(PluginAi.defaultConfig(event.getGroupId(), defaultHandler.vendor(), defaultHandler.defaultModel()));
+                        if (Objects.equals(pluginAi.getIsDisable(), 0)) {
+                            pluginAi.setSystemTemplate("你的职能是为用户的消息添加emoji，直接回复添加emoji后的消息即可，不要做任何解释");
+                            ChatResponse chatResponse = aiHandlerSelector.get(pluginAi.getVendor()).generateAnswer(pluginAi
+                                    , "用户的消息是：" + BotUtil.getText(msg));
                             bot.sendGroupMsg(event.getGroupId(), chatResponse.getResult(), false);
                         }
                         return;

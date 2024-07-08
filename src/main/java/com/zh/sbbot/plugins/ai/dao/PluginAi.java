@@ -66,11 +66,11 @@ public class PluginAi {
      */
     private Integer tts;
 
-    public static PluginAi defaultConfig(Long groupId) {
+    public static PluginAi defaultConfig(Long groupId, String vendor, String model) {
         PluginAi pluginAi = new PluginAi();
         pluginAi.setGroupId(groupId);
         pluginAi.setSystemTemplate("你是一个很有用的群聊助手");
-        pluginAi.setModel("qwen-turbo");
+        pluginAi.setModel(model);
 
         pluginAi.setTemperature("0.9");
         pluginAi.setIsDisable(0);
@@ -78,7 +78,7 @@ public class PluginAi {
 
         pluginAi.setLastN(5);
         pluginAi.setEnableSearch(1);
-        pluginAi.setVendor(VendorEnum.qwen.name());
+        pluginAi.setVendor(vendor);
 
         pluginAi.setTopP("0.9");
         pluginAi.setTts(0);
