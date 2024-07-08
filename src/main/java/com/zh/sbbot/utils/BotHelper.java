@@ -77,8 +77,7 @@ public class BotHelper {
      * @param text  回复内容
      */
     public void reply(AnyMessageEvent event, String text) {
-        AnyMessageEvent anyMessageEvent = BotUtil.castToAnyMessageEvent(event);
-        reply(anyMessageEvent, text, false);
+        reply(event, text, false);
     }
 
     /**

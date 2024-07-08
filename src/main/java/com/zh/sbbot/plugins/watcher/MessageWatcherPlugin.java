@@ -1,4 +1,4 @@
-package com.zh.sbbot.plugins.message;
+package com.zh.sbbot.plugins.watcher;
 
 
 import com.mikuac.shiro.annotation.GroupMessageHandler;
@@ -28,22 +28,27 @@ import java.util.Optional;
 
 import static com.mikuac.shiro.enums.MsgTypeEnum.*;
 
+/**
+ * 监听全部消息。
+ * 一般只在命中规则时执行操作（如复读）
+ */
 @Shiro
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class MessageRepeatPlugin {
+@SuppressWarnings("unused")
+public class MessageWatcherPlugin {
 
     private final DictRepository dictRepository;
     private final AiHandlerSelector aiHandlerSelector;
     private final PluginAiRepository pluginAiRepository;
 
     /*
-     * 按规则复读
+     * AI复读
      */
     @GroupMessageHandler
     @MessageHandlerFilter(at = AtEnum.NOT_NEED)
-    public void repeatRandom(GroupMessageEvent event, Bot bot) {
+    public void repeatByAi(GroupMessageEvent event, Bot bot) {
         String[] list = dictRepository.get(DictKey.PLUGIN_REPEAT_MSG_RULE, String.class).split(",");
         List<ArrayMsg> msg = event.getArrayMsg();
         for (int i = msg.size() - 1; i >= 0; i--) {
@@ -80,4 +85,5 @@ public class MessageRepeatPlugin {
             bot.sendGroupMsg(event.getGroupId(), event.getArrayMsg(), false);
         }
     }
+
 }

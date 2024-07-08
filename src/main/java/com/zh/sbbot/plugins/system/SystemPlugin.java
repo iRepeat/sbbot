@@ -28,12 +28,13 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 
 /**
- * 管理员插件
+ * 封装一些交互式的命令。
+ * <p>
+ * 大部分仅允许管理员使用，少部分可由普通用户触发
  */
 @Shiro
 @Component
 @Slf4j
-@Admin
 @RequiredArgsConstructor
 @SuppressWarnings("unused")
 public class SystemPlugin {
@@ -44,7 +45,11 @@ public class SystemPlugin {
     private final DictRepository dictRepository;
     private final AliasRepository aliasRepository;
 
+    /**
+     * 让bot重复你的话
+     */
     @AnyMessageHandler
+    @Admin
     @MessageHandlerFilter(startWith = ".say", at = AtEnum.NOT_NEED)
     public void say(Bot bot, AnyMessageEvent event, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> {
@@ -54,7 +59,11 @@ public class SystemPlugin {
         });
     }
 
+    /**
+     * 让bot发送一条json卡片信息
+     */
     @AnyMessageHandler
+    @Admin
     @MessageHandlerFilter(startWith = ".json", at = AtEnum.NOT_NEED)
     public void json(Bot bot, AnyMessageEvent event, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> {
@@ -63,16 +72,22 @@ public class SystemPlugin {
         });
     }
 
-
+    /**
+     * 让bot重复你的话（文本形式发送，媒体信息或表情等会转译为CQ码）
+     */
     @AnyMessageHandler
+    @Admin
     @MessageHandlerFilter(startWith = ".echo", at = AtEnum.NOT_NEED)
     public void echo(Bot bot, AnyMessageEvent event, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> bot.sendMsg(event,
                 ShiroUtils.unescape(s), true));
     }
 
-
+    /**
+     * 全局启用（当system.enable=false时，可用该命令临时启用bot）
+     */
     @AnyMessageHandler
+    @Admin
     @MessageHandlerFilter(cmd = ".up", at = AtEnum.NOT_NEED)
     public void up(AnyMessageEvent event) {
         systemSetting.setEnable(true);
@@ -81,7 +96,11 @@ public class SystemPlugin {
     }
 
 
+    /**
+     * 全局禁用（当system.enable=true时，可用该命令临时禁用bot）
+     */
     @AnyMessageHandler
+    @Admin
     @MessageHandlerFilter(cmd = ".down", at = AtEnum.NOT_NEED)
     public void down(AnyMessageEvent event) {
         systemSetting.setEnable(false);
@@ -90,7 +109,11 @@ public class SystemPlugin {
     }
 
 
+    /**
+     * 执行系统shell命令
+     */
     @AnyMessageHandler
+    @Admin
     @MessageHandlerFilter(startWith = ".exec", at = AtEnum.NOT_NEED)
     public void exec(AnyMessageEvent event, Bot bot, Matcher matcher) {
         String param = BotUtil.getParam(matcher);
@@ -117,7 +140,11 @@ public class SystemPlugin {
         }
     }
 
+    /**
+     * 执行sql
+     */
     @AnyMessageHandler
+    @Admin
     @MessageHandlerFilter(startWith = ".db", at = AtEnum.NOT_NEED)
     public void dbExec(AnyMessageEvent event, Matcher matcher) {
         String sql = BotUtil.getParam(matcher);
@@ -151,12 +178,16 @@ public class SystemPlugin {
         botHelper.reply(event, msg);
     }
 
+    /**
+     * 设置字典值
+     */
     @AnyMessageHandler
+    @Admin
     @MessageHandlerFilter(startWith = ".set", at = AtEnum.NOT_NEED)
     public void set(AnyMessageEvent event, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> {
             int i = s.indexOf(' ');
-            if (i > -1){
+            if (i > -1) {
                 String key = ShiroUtils.unescape(s.substring(0, i).trim());
                 String value = ShiroUtils.unescape(s.substring(i + 1).trim());
                 if (Objects.equals(value, "del")) {
@@ -170,7 +201,11 @@ public class SystemPlugin {
         });
     }
 
+    /**
+     * 获取字典值
+     */
     @AnyMessageHandler
+    @Admin
     @MessageHandlerFilter(startWith = ".get", at = AtEnum.NOT_NEED)
     public void get(AnyMessageEvent event, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher)).ifPresentOrElse(param -> {
@@ -212,12 +247,16 @@ public class SystemPlugin {
     }
 
 
+    /**
+     * 命令别名
+     */
     @AnyMessageHandler
+    @Admin
     @MessageHandlerFilter(startWith = ".alias", at = AtEnum.NOT_NEED)
     public void aliSet(AnyMessageEvent event, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> {
             int i = s.indexOf(' ');
-            if (i > -1){
+            if (i > -1) {
                 String key = ShiroUtils.unescape(s.substring(0, i).trim());
                 if (key.contains("【参数】")) {
                     botHelper.reply(event, "key不能包含【参数】");
@@ -233,6 +272,18 @@ public class SystemPlugin {
                 }
             }
         });
+    }
+
+
+    /**
+     * 解码/编码base64
+     * 【】表示编码，】【表示解码
+     */
+    @AnyMessageHandler
+    @MessageHandlerFilter(startWith = {"】", "【"}, endWith = {"】", "【"})
+    public void base64(AnyMessageEvent event) {
+        String param = BotUtil.base64(ShiroUtils.unescape(event.getMessage()));
+        botHelper.reply(event, param, true);
     }
 
 
