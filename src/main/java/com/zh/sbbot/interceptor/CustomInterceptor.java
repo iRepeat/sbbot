@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -35,7 +36,7 @@ public class CustomInterceptor implements BotMessageEventInterceptor {
         // 判断是否是命令别名
         String unescaped = ShiroUtils.unescape(event.getRawMessage());
         String value = getMatchingValue(unescaped, event);
-        if (StringUtils.isNotBlank(value)) {
+        if (!Objects.equals(value, unescaped)) {
             log.info("replace: [{}] => [{}] ", unescaped, value);
             if (event.getRawMessage() != null) {
                 event.setRawMessage(value);
@@ -61,26 +62,33 @@ public class CustomInterceptor implements BotMessageEventInterceptor {
     private String getMatchingValue(String rawMessage, MessageEvent event) {
         String[] messageParts = Optional.ofNullable(rawMessage).map(s -> s.trim().split("\\$")).orElse(new String[0]);
         if (messageParts.length == 0) {
-            return null;
+            return rawMessage;
         }
         String value = aliasRepository.get(messageParts[0].trim());
         if (value == null) {
-            return null;
+            return rawMessage;
         }
-        if (StringUtils.countMatches(value, "【参数】") != messageParts.length - 1) {
-            log.info("matched alias: [{}] but parameter size is not equal, message: [{}]", value, rawMessage);
-            return null;
+        if (StringUtils.countMatches(value, "【参数】") > messageParts.length - 1) {
+            log.info("matched alias: [{}] but missing parameters, message: [{}]", value, rawMessage);
+            return rawMessage;
         }
+        StringBuilder valueBuilder = new StringBuilder(value);
         for (int i = 1; i < messageParts.length; i++) {
-            value = value.replaceFirst("【参数】", messageParts[i]);
+            if (!valueBuilder.toString().contains("【参数】")) {
+                // 将messageParts[i](包含i)之后的字符串与value拼接
+                valueBuilder.append("$").append(messageParts[i]);
+            } else {
+                valueBuilder = new StringBuilder(valueBuilder.toString().replaceFirst("【参数】", messageParts[i]));
+            }
         }
+        value = String.valueOf(valueBuilder);
         value = value.replace("【group】", event instanceof GroupMessageEvent ?
                 ((GroupMessageEvent) event).getGroupId().toString() : "0");
         value = value.replace("【user】", event.getUserId() != null ?
                 event.getUserId().toString() : "0");
         value = value.replace("【self】", event.getSelfId() != null ?
                 event.getSelfId().toString() : "0");
-        return value;
+        return getMatchingValue(value, event);
     }
 
     @Override
