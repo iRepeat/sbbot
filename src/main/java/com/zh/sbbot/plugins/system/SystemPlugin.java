@@ -131,6 +131,9 @@ public class SystemPlugin {
             else if (result.trim().startsWith("{\"app\"")) {
                 log.info("发送json数据：{}", result);
                 bot.sendMsg(event, ArrayMsgUtils.builder().json(result).build(), false);
+            } else if (result.contains("[CQ:record")) {
+                // 语音消息无法被引用，因此不能使用reply
+                bot.sendMsg(event, result, false);
             } else {
                 botHelper.reply(event, result);
             }
