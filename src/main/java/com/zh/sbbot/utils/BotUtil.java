@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -77,22 +76,6 @@ public class BotUtil {
                 .filter(it -> MsgTypeEnum.text == it.getType())
                 .map(it -> it.getData().get("text"))
                 .collect(Collectors.joining(join)).trim();
-    }
-
-    /**
-     * 由于当前Shiro框架不支持图片summary参数（会导致无法将`[CQ:image,summary=[xxx],file=xxx]`解析为ArrayMsg图片对象），因此有了这个适配方法。
-     * <p>
-     * [CQ:image,summary=[动画表情],file=xxx] => [CQ:image,file=xxx]
-     */
-    public static String adaptCQImage(String cqImage) {
-        // 定义正则表达式，匹配 summary 字段及其内容
-        String regex = "summary=\\[.*?\\],?";
-
-        // 使用正则表达式替换 summary 字段
-        String result = Pattern.compile(regex).matcher(cqImage).replaceAll("");
-
-        // 去除可能多余的逗号
-        return result.replaceAll(",]", "]").replaceAll("\\[,", "[");
     }
 
     /**

@@ -53,9 +53,8 @@ public class SystemPlugin {
     @MessageHandlerFilter(startWith = ".say", at = AtEnum.NOT_NEED)
     public void say(Bot bot, AnyMessageEvent event, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> {
-            s = BotUtil.adaptCQImage(ShiroUtils.unescape(s));
-            List<ArrayMsg> msgList = ShiroUtils.rawToArrayMsg(s);
-            bot.sendMsg(event, botHelper.adaptImgData(msgList), false);
+            List<ArrayMsg> msgList = ShiroUtils.rawToArrayMsg(ShiroUtils.unescape(s));
+            bot.sendMsg(event, msgList, false);
         });
     }
 
