@@ -1,5 +1,6 @@
 package com.zh.sbbot.utils;
 
+import com.google.common.collect.Maps;
 import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.core.BotContainer;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * 结合了spring上下文的bot工具类
@@ -93,6 +95,15 @@ public class BotHelper {
      */
     public void reply(GroupMessageEvent event, String text) {
         reply(event, text, false);
+    }
+
+    /**
+     * 拓展api-设置头像
+     */
+    public void setSelfAvatar(String url) {
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("file", url);
+        defaultBot().customRequest(() -> "set_qq_avatar", params);
     }
 
 }

@@ -17,12 +17,15 @@ import com.zh.sbbot.utils.BotHelper;
 import com.zh.sbbot.utils.BotUtil;
 import com.zh.sbbot.utils.CommandExecutor;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.io.File;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -274,6 +277,30 @@ public class SystemPlugin {
                 }
             }
         });
+    }
+
+
+    /**
+     * 设置头像
+     */
+    @SneakyThrows
+    @AnyMessageHandler
+    @Admin
+    @MessageHandlerFilter(startWith = ".avatar", at = AtEnum.NOT_NEED)
+    public void avatar(AnyMessageEvent event, Matcher matcher) {
+        List<String> imgList = ShiroUtils.getMsgImgUrlList(event.getArrayMsg());
+        if (CollectionUtils.isEmpty(imgList)) {
+            // 获取今天周几
+            int week = (Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1) % 7;
+            // 文件转base64
+            String file = "./image/avatar_week" + week + ".jpg";
+            String base64Img = new String(Base64.getEncoder().encode(FileUtils.readFileToByteArray(new File(file))));
+            botHelper.setSelfAvatar("base64://" + base64Img);
+            log.info("更换每日头像：{}", file);
+        } else {
+            botHelper.setSelfAvatar(imgList.get(0));
+            log.info("头像已更换：{}", imgList.get(0));
+        }
     }
 
 
