@@ -22,6 +22,7 @@ public class BotHelper {
 
     private final SystemSetting systemSetting;
     private final BotContainer botContainer;
+    private final BotIdHolder botIdHolder;
 
     /**
      * 判断是否是超级用户
@@ -31,13 +32,6 @@ public class BotHelper {
      */
     public boolean isSuperUser(Long userId) {
         return Arrays.asList(systemSetting.getSuperUser()).contains(userId);
-    }
-
-    /**
-     * 默认bot
-     */
-    public Bot defaultBot() {
-        return botContainer.robots.get(systemSetting.getDefaultBot());
     }
 
     /**
@@ -62,7 +56,7 @@ public class BotHelper {
         String msg = msgUtils.build();
 
         // 发送群消息
-        defaultBot().sendMsg(event, msg, autoEscape);
+        getBot().sendMsg(event, msg, autoEscape);
     }
 
     /**
@@ -103,7 +97,31 @@ public class BotHelper {
     public void setSelfAvatar(String url) {
         Map<String, Object> params = Maps.newHashMap();
         params.put("file", url);
-        defaultBot().customRequest(() -> "set_qq_avatar", params);
+        getBot().customRequest(() -> "set_qq_avatar", params);
+    }
+
+    /**
+     * 获取默认bot
+     */
+    public Bot defaultBot() {
+        return getBot(systemSetting.getDefaultBot());
+    }
+
+    /**
+     * 获取当前上下文bot。
+     * 如果上下文bot不存在（如异步线程中），则返回默认bot
+     */
+    public Bot getBot() {
+        Bot bot = getBot(botIdHolder.getBotId());
+        return bot == null ? defaultBot() : bot;
+    }
+
+
+    /**
+     * 根据Id获取bot
+     */
+    public Bot getBot(long botId) {
+        return botContainer.robots.get(botId);
     }
 
 }

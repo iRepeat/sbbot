@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.mikuac.shiro.common.utils.EventUtils;
 import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.core.Bot;
-import com.mikuac.shiro.core.BotContainer;
 import com.mikuac.shiro.dto.action.common.ActionData;
 import com.mikuac.shiro.dto.action.common.ActionList;
 import com.mikuac.shiro.dto.action.common.MsgId;
@@ -14,6 +13,7 @@ import com.mikuac.shiro.dto.action.response.GroupInfoResp;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.handler.injection.InjectionHandler;
 import com.zh.sbbot.utils.AnnotationHandlerContainer;
+import com.zh.sbbot.utils.BotHelper;
 import com.zh.sbbot.utils.BotUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -30,10 +30,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping()
 public class BotController {
     private static final Logger log = LoggerFactory.getLogger(BotController.class);
-    private final BotContainer botContainer;
     private final InjectionHandler injectionHandler;
     private final EventUtils eventUtils;
     private final AnnotationHandlerContainer annotationHandlerContainer;
+    private final BotHelper botHelper;
 
     private static ResponseEntity<String> sendPrivate(SimpleMsgModel model, Bot bot) {
         ActionList<FriendInfoResp> friendList = bot.getFriendList();
@@ -61,7 +61,7 @@ public class BotController {
         if (model.getUser() == null && model.getGroup() == null) {
             return ResponseEntity.badRequest().body("user and group cannot both be empty");
         }
-        Bot bot = model.getBot() == null ? null : botContainer.robots.get(model.getBot());
+        Bot bot = model.getBot() == null ? null : botHelper.getBot(model.getBot());
         if (bot == null) {
             return ResponseEntity.badRequest().body("bot is illegal");
         }
@@ -81,7 +81,7 @@ public class BotController {
         if (model.getUser() == null && model.getGroup() == null) {
             return ResponseEntity.badRequest().body("user and group cannot both be empty");
         }
-        Bot bot = model.getBot() == null ? null : botContainer.robots.get(model.getBot());
+        Bot bot = model.getBot() == null ? null : botHelper.getBot(model.getBot());
         if (bot == null) {
             return ResponseEntity.badRequest().body("bot is illegal");
         }

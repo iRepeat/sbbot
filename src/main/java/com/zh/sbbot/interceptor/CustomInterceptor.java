@@ -9,6 +9,7 @@ import com.zh.sbbot.configs.SystemSetting;
 import com.zh.sbbot.repository.AliasRepository;
 import com.zh.sbbot.utils.AnnotationHandlerContainer;
 import com.zh.sbbot.utils.BotHelper;
+import com.zh.sbbot.utils.BotIdHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -19,7 +20,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * 此拦截器主要两个作用：1. 实现权限控制 2. 实现全局bot开关 3. 实现命令别名
+ * 此拦截器主要作用：1. 实现权限控制 2. 实现全局bot开关 3. 实现命令别名 4. 存储botId到上下文
  */
 @Component
 @Slf4j
@@ -29,6 +30,7 @@ public class CustomInterceptor implements BotMessageEventInterceptor {
     private final SystemSetting systemSetting;
     private final BotHelper botHelper;
     private final AliasRepository aliasRepository;
+    private final BotIdHolder botHolder;
 
 
     @Override
@@ -56,7 +58,9 @@ public class CustomInterceptor implements BotMessageEventInterceptor {
         } else {
             bot.setAnnotationHandler(container.getAnnotationHandlerWithoutAdmin());
         }
-        return List.of(".up", ".down").contains(event.getRawMessage()) || systemSetting.isEnable();
+        boolean b = List.of(".up", ".down").contains(event.getRawMessage()) || systemSetting.isEnable();
+        if (b) botHolder.setBotId(event.getSelfId());
+        return b;
     }
 
     private String getMatchingValue(String rawMessage, MessageEvent event) {
@@ -93,6 +97,7 @@ public class CustomInterceptor implements BotMessageEventInterceptor {
 
     @Override
     public void afterCompletion(Bot bot, MessageEvent event) {
+        botHolder.clear();
     }
 
 }
