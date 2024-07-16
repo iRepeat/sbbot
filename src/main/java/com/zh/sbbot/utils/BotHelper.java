@@ -43,6 +43,7 @@ public class BotHelper {
      * 获取群成员类型
      */
     public MemberRole getMemberRole(Long botId, Long userId, Long groupId) {
+        if (userId == null) return MemberRole.OTHER;
         ActionData<GroupMemberInfoResp> memberInfo = getBot(botId).getGroupMemberInfo(groupId, userId, true);
         return Optional.ofNullable(memberInfo).map(ActionData::getData).
                 map(GroupMemberInfoResp::getRole).map(MemberRole::of).orElse(MemberRole.OTHER);
