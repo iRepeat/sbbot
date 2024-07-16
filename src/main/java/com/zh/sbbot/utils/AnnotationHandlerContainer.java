@@ -2,14 +2,13 @@ package com.zh.sbbot.utils;
 
 import com.mikuac.shiro.annotation.common.Order;
 import com.mikuac.shiro.annotation.common.Shiro;
-import com.mikuac.shiro.common.utils.AopTargetUtils;
 import com.mikuac.shiro.common.utils.ScanUtils;
-import com.mikuac.shiro.exception.ShiroException;
 import com.mikuac.shiro.model.HandlerMethod;
 import com.zh.sbbot.annotations.Admin;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -46,24 +45,18 @@ public class AnnotationHandlerContainer {
         annotationHandlerWithoutAdmin = new LinkedMultiValueMap<>();
         annotationHandler = new LinkedMultiValueMap<>();
         beans.values().forEach(obj -> {
-            Object target;
-            try {
-                target = AopTargetUtils.getTarget(obj);
-            } catch (Exception e) {
-                throw new ShiroException(e);
-            }
-            Class<?> beanClass = target.getClass();
-            Arrays.stream(beanClass.getMethods()).forEach(method -> {
+            Class<?> targetClass = AopProxyUtils.ultimateTargetClass(obj);
+            Arrays.stream(targetClass.getMethods()).forEach(method -> {
                 HandlerMethod handlerMethod = new HandlerMethod();
                 handlerMethod.setMethod(method);
-                handlerMethod.setType(beanClass);
+                handlerMethod.setType(targetClass);
                 handlerMethod.setObject(obj);
                 Arrays.stream(method.getDeclaredAnnotations()).forEach(annotation -> {
                     Set<Class<?>> as = getShiroAnnotations();
                     Class<? extends Annotation> annotationType = annotation.annotationType();
                     if (as.contains(annotationType)) {
                         annotationHandler.add(annotation.annotationType(), handlerMethod);
-                        if (beanClass.getAnnotationsByType(Admin.class).length == 0 && method.getDeclaredAnnotationsByType(Admin.class).length == 0) {
+                        if (targetClass.getAnnotationsByType(Admin.class).length == 0 && method.getDeclaredAnnotationsByType(Admin.class).length == 0) {
                             // 方法或者类包含Admin注解的功能仅管理员可用
                             annotationHandlerWithoutAdmin.add(annotation.annotationType(), handlerMethod);
                         }

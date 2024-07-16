@@ -25,14 +25,14 @@ public class MsgDeleteEvent {
     @GroupMsgDeleteNoticeHandler
     public void onMsgDelete(GroupMsgDeleteNoticeEvent event, Bot bot) {
         log.info("{}撤回了一条消息：{}", event.getUserId(), event);
-        String msg = MsgUtils.builder().face(269).reply(Math.toIntExact(event.getMsgId())).build();
+        String msg = MsgUtils.builder().face(269).reply(Math.toIntExact(event.getMessageId())).build();
         bot.sendGroupMsg(event.getGroupId(), msg, false);
     }
 
     @PrivateMsgDeleteNoticeHandler
     public void onPrivateMsgDelete(PrivateMsgDeleteNoticeEvent event, Bot bot) {
         log.info("{}撤回了一条消息：{}", event.getUserId(), event);
-        String msg = MsgUtils.builder().face(269).reply(Math.toIntExact(event.getMsgId())).build();
+        String msg = MsgUtils.builder().face(269).reply(Math.toIntExact(event.getMessageId())).build();
         bot.sendPrivateMsg(event.getUserId(), msg, false);
     }
 }
