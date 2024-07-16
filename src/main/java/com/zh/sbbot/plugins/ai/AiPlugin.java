@@ -12,6 +12,7 @@ import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.mikuac.shiro.enums.MsgTypeEnum;
 import com.zh.sbbot.annotations.Admin;
+import com.zh.sbbot.constant.AdminMode;
 import com.zh.sbbot.plugins.ai.dao.PluginAi;
 import com.zh.sbbot.plugins.ai.dao.PluginAiRepository;
 import com.zh.sbbot.plugins.ai.handler.AiHandler;
@@ -116,7 +117,7 @@ public class AiPlugin {
         }
     }
 
-    @Admin
+    @Admin(mode = AdminMode.GROUP_ADMIN)
     @GroupMessageHandler
     @MessageHandlerFilter(startWith = ".ai", at = AtEnum.NOT_NEED)
     public void manage(GroupMessageEvent event, Matcher matcher) {
