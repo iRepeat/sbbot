@@ -6,6 +6,7 @@ import com.mikuac.shiro.core.BotMessageEventInterceptor;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.dto.event.message.MessageEvent;
 import com.zh.sbbot.configs.SystemSetting;
+import com.zh.sbbot.constant.MemberRole;
 import com.zh.sbbot.repository.AliasRepository;
 import com.zh.sbbot.utils.AnnotationHandlerContainer;
 import com.zh.sbbot.utils.BotHelper;
@@ -58,10 +59,11 @@ public class CustomInterceptor implements BotMessageEventInterceptor {
         }
         // 群主或群管理可用的处理方法集合
         else if (event instanceof GroupMessageEvent groupEvent) {
-            if (botHelper.isGroupOwner(event.getUserId(), groupEvent.getGroupId())) {
-                bot.setAnnotationHandler(container.getAnnotationHandlerWithGroupOwner());
-            } else if (botHelper.isGroupAdmin(event.getUserId(), groupEvent.getGroupId())) {
-                bot.setAnnotationHandler(container.getAnnotationHandlerWithGroupAdmin());
+            MemberRole role = botHelper.getMemberRole(event.getSelfId(), event.getUserId(), groupEvent.getGroupId());
+            switch (role){
+                case OWNER -> bot.setAnnotationHandler(container.getAnnotationHandlerWithGroupOwner());
+                case ADMIN -> bot.setAnnotationHandler(container.getAnnotationHandlerWithGroupAdmin());
+                default -> bot.setAnnotationHandler(container.getAnnotationHandlerWithoutAdmin());
             }
         }
         // 普通用户可用的处理方法集合

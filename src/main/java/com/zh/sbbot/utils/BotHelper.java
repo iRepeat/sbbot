@@ -9,6 +9,7 @@ import com.mikuac.shiro.dto.action.response.GroupMemberInfoResp;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.zh.sbbot.configs.SystemSetting;
+import com.zh.sbbot.constant.MemberRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -39,22 +40,12 @@ public class BotHelper {
 
 
     /**
-     * 判断是否是群主
+     * 获取群成员类型
      */
-    public boolean isGroupOwner(Long userId, Long groupId) {
-        ActionData<GroupMemberInfoResp> memberInfo = getBot().getGroupMemberInfo(groupId, userId, true);
-        return Optional.ofNullable(memberInfo).map(ActionData::getData)
-                .filter(resp -> "owner".equals(resp.getRole())).isPresent();
-    }
-
-
-    /**
-     * 判断是否是群管理员
-     */
-    public boolean isGroupAdmin(Long userId, Long groupId) {
-        ActionData<GroupMemberInfoResp> memberInfo = getBot().getGroupMemberInfo(groupId, userId, true);
-        return Optional.ofNullable(memberInfo).map(ActionData::getData)
-                .filter(resp -> "admin".equals(resp.getRole())).isPresent();
+    public MemberRole getMemberRole(Long botId, Long userId, Long groupId) {
+        ActionData<GroupMemberInfoResp> memberInfo = getBot(botId).getGroupMemberInfo(groupId, userId, true);
+        return Optional.ofNullable(memberInfo).map(ActionData::getData).
+                map(GroupMemberInfoResp::getRole).map(MemberRole::of).orElse(MemberRole.OTHER);
     }
 
     /**
@@ -143,7 +134,7 @@ public class BotHelper {
     /**
      * 根据Id获取bot
      */
-    public Bot getBot(long botId) {
+    public Bot getBot(Long botId) {
         return botContainer.robots.get(botId);
     }
 

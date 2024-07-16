@@ -64,8 +64,10 @@ public class AnnotationHandlerContainer {
                     if (as.contains(annotationType)) {
                         annotationHandler.add(annotation.annotationType(), handlerMethod);
                         if (method.getDeclaredAnnotationsByType(Admin.class).length == 0) {
-                            // 方法或者类包含Admin注解的功能仅管理员可用
+                            // 方法不包含Admin注解的功能群主、群管、普通用户可用
                             annotationHandlerWithoutAdmin.add(annotation.annotationType(), handlerMethod);
+                            annotationHandlerWithGroupOwner.add(annotation.annotationType(), handlerMethod);
+                            annotationHandlerWithGroupAdmin.add(annotation.annotationType(), handlerMethod);
                         } else {
                             AdminMode mode = method.getDeclaredAnnotationsByType(Admin.class)[0].mode();
                             switch (mode) {
@@ -80,6 +82,8 @@ public class AnnotationHandlerContainer {
             });
         });
         this.sort(annotationHandlerWithoutAdmin);
+        this.sort(annotationHandlerWithGroupOwner);
+        this.sort(annotationHandlerWithGroupAdmin);
         this.sort(annotationHandler);
     }
 
