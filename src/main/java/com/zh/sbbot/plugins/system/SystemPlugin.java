@@ -11,6 +11,7 @@ import com.mikuac.shiro.enums.AtEnum;
 import com.mikuac.shiro.model.ArrayMsg;
 import com.zh.sbbot.annotations.Admin;
 import com.zh.sbbot.configs.SystemSetting;
+import com.zh.sbbot.constant.AdminMode;
 import com.zh.sbbot.repository.AliasRepository;
 import com.zh.sbbot.repository.DictRepository;
 import com.zh.sbbot.utils.BotHelper;
@@ -52,7 +53,7 @@ public class SystemPlugin {
      * 让bot重复你的话
      */
     @AnyMessageHandler
-    @Admin
+    @Admin(mode = AdminMode.GROUP_ADMIN)
     @MessageHandlerFilter(startWith = ".say", at = AtEnum.NOT_NEED)
     public void say(Bot bot, AnyMessageEvent event, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> {
@@ -65,7 +66,7 @@ public class SystemPlugin {
      * 让bot发送一条json卡片信息
      */
     @AnyMessageHandler
-    @Admin
+    @Admin(mode = AdminMode.GROUP_ADMIN)
     @MessageHandlerFilter(startWith = ".json", at = AtEnum.NOT_NEED)
     public void json(Bot bot, AnyMessageEvent event, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> {
@@ -78,7 +79,7 @@ public class SystemPlugin {
      * 让bot重复你的话（文本形式发送，媒体信息或表情等会转译为CQ码）
      */
     @AnyMessageHandler
-    @Admin
+    @Admin(mode = AdminMode.GROUP_ADMIN)
     @MessageHandlerFilter(startWith = ".echo", at = AtEnum.NOT_NEED)
     public void echo(Bot bot, AnyMessageEvent event, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> bot.sendMsg(event,
@@ -285,7 +286,7 @@ public class SystemPlugin {
      */
     @SneakyThrows
     @AnyMessageHandler
-    @Admin
+    @Admin(mode = AdminMode.GROUP_ADMIN)
     @MessageHandlerFilter(startWith = ".avatar", at = AtEnum.NOT_NEED)
     public void avatar(AnyMessageEvent event, Matcher matcher) {
         List<String> imgList = ShiroUtils.getMsgImgUrlList(event.getArrayMsg());

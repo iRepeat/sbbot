@@ -52,10 +52,20 @@ public class CustomInterceptor implements BotMessageEventInterceptor {
             // 别名命令不检查管理员权限
             bot.setAnnotationHandler(container.getAnnotationHandler());
         }
-        // 根据不同的用户权限设定不同的处理方法集合
+        // 超级用户可用的处理方法集合
         else if (botHelper.isSuperUser(event.getUserId())) {
             bot.setAnnotationHandler(container.getAnnotationHandler());
-        } else {
+        }
+        // 群主或群管理可用的处理方法集合
+        else if (event instanceof GroupMessageEvent groupEvent) {
+            if (botHelper.isGroupOwner(event.getUserId(), groupEvent.getGroupId())) {
+                bot.setAnnotationHandler(container.getAnnotationHandlerWithGroupOwner());
+            } else if (botHelper.isGroupAdmin(event.getUserId(), groupEvent.getGroupId())) {
+                bot.setAnnotationHandler(container.getAnnotationHandlerWithGroupAdmin());
+            }
+        }
+        // 普通用户可用的处理方法集合
+        else {
             bot.setAnnotationHandler(container.getAnnotationHandlerWithoutAdmin());
         }
         boolean b = List.of(".up", ".down").contains(event.getRawMessage()) || systemSetting.isEnable();

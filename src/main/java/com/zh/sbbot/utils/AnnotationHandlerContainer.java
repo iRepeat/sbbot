@@ -5,6 +5,7 @@ import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.common.utils.ScanUtils;
 import com.mikuac.shiro.model.HandlerMethod;
 import com.zh.sbbot.annotations.Admin;
+import com.zh.sbbot.constant.AdminMode;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,10 @@ public class AnnotationHandlerContainer {
     @Getter
     private MultiValueMap<Class<? extends Annotation>, HandlerMethod> annotationHandlerWithoutAdmin;
     @Getter
+    private MultiValueMap<Class<? extends Annotation>, HandlerMethod> annotationHandlerWithGroupAdmin;
+    @Getter
+    private MultiValueMap<Class<? extends Annotation>, HandlerMethod> annotationHandlerWithGroupOwner;
+    @Getter
     private MultiValueMap<Class<? extends Annotation>, HandlerMethod> annotationHandler;
 
     /**
@@ -43,6 +48,8 @@ public class AnnotationHandlerContainer {
         Map<String, Object> beans = new HashMap<>(applicationContext.getBeansWithAnnotation(Shiro.class));
         // 一键多值 注解为 Key 存放所有包含某个注解的方法
         annotationHandlerWithoutAdmin = new LinkedMultiValueMap<>();
+        annotationHandlerWithGroupAdmin = new LinkedMultiValueMap<>();
+        annotationHandlerWithGroupOwner = new LinkedMultiValueMap<>();
         annotationHandler = new LinkedMultiValueMap<>();
         beans.values().forEach(obj -> {
             Class<?> targetClass = AopProxyUtils.ultimateTargetClass(obj);
@@ -56,9 +63,17 @@ public class AnnotationHandlerContainer {
                     Class<? extends Annotation> annotationType = annotation.annotationType();
                     if (as.contains(annotationType)) {
                         annotationHandler.add(annotation.annotationType(), handlerMethod);
-                        if (targetClass.getAnnotationsByType(Admin.class).length == 0 && method.getDeclaredAnnotationsByType(Admin.class).length == 0) {
+                        if (method.getDeclaredAnnotationsByType(Admin.class).length == 0) {
                             // 方法或者类包含Admin注解的功能仅管理员可用
                             annotationHandlerWithoutAdmin.add(annotation.annotationType(), handlerMethod);
+                        } else {
+                            AdminMode mode = method.getDeclaredAnnotationsByType(Admin.class)[0].mode();
+                            switch (mode) {
+                                case GROUP_ADMIN ->
+                                        annotationHandlerWithGroupAdmin.add(annotation.annotationType(), handlerMethod);
+                                case GROUP_OWNER ->
+                                        annotationHandlerWithGroupOwner.add(annotation.annotationType(), handlerMethod);
+                            }
                         }
                     }
                 });

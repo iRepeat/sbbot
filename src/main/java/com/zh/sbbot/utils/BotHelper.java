@@ -4,6 +4,8 @@ import com.google.common.collect.Maps;
 import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.core.BotContainer;
+import com.mikuac.shiro.dto.action.common.ActionData;
+import com.mikuac.shiro.dto.action.response.GroupMemberInfoResp;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.zh.sbbot.configs.SystemSetting;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 结合了spring上下文的bot工具类
@@ -32,6 +35,26 @@ public class BotHelper {
      */
     public boolean isSuperUser(Long userId) {
         return Arrays.asList(systemSetting.getSuperUser()).contains(userId);
+    }
+
+
+    /**
+     * 判断是否是群主
+     */
+    public boolean isGroupOwner(Long userId, Long groupId) {
+        ActionData<GroupMemberInfoResp> memberInfo = getBot().getGroupMemberInfo(groupId, userId, true);
+        return Optional.ofNullable(memberInfo).map(ActionData::getData)
+                .filter(resp -> "owner".equals(resp.getRole())).isPresent();
+    }
+
+
+    /**
+     * 判断是否是群管理员
+     */
+    public boolean isGroupAdmin(Long userId, Long groupId) {
+        ActionData<GroupMemberInfoResp> memberInfo = getBot().getGroupMemberInfo(groupId, userId, true);
+        return Optional.ofNullable(memberInfo).map(ActionData::getData)
+                .filter(resp -> "admin".equals(resp.getRole())).isPresent();
     }
 
     /**
