@@ -79,32 +79,39 @@ public class AiPlugin {
             return;
         }
 
-        // 当前用户的会话ID
-        String conversationId = groupId + "::" + event.getUserId();
+        ChatResponse response;
+        if (text.startsWith("##")) {
+            // 进行单次对话（不携带上下文，不会保留历史）
+            response = aiHandler.generateAnswer(pluginAi, text);
+            log.info("AI： {}", response);
+        } else {
+            // 当前用户的会话ID
+            String conversationId = groupId + "::" + event.getUserId();
 
-        try {
-            // 如果是回复机器人信息，则使用机器人所回复的用户的上下文
-            if (BotUtil.isReplyMe(event)) {
-                ActionData<GetMsgResp> msgId =
-                        bot.getMsg(Integer.parseInt(event.getArrayMsg().stream().filter(it -> it.getType() == MsgTypeEnum.reply).findFirst().orElseThrow().getData().get("id")));
-                String qq =
-                        BotUtil.parseArrayMsg(msgId.getData().getMessage()).stream().filter(it -> it.getType() == MsgTypeEnum.at).findFirst().orElseThrow().getData().get("qq");
-                conversationId = groupId + "::" + qq;
-                log.info("临时切换上下文：{} -> {}", event.getUserId(), qq);
+            try {
+                // 如果是回复机器人信息，则使用机器人所回复的用户的上下文
+                if (BotUtil.isReplyMe(event)) {
+                    ActionData<GetMsgResp> msgId =
+                            bot.getMsg(Integer.parseInt(event.getArrayMsg().stream().filter(it -> it.getType() == MsgTypeEnum.reply).findFirst().orElseThrow().getData().get("id")));
+                    String qq =
+                            BotUtil.parseArrayMsg(msgId.getData().getMessage()).stream().filter(it -> it.getType() == MsgTypeEnum.at).findFirst().orElseThrow().getData().get("qq");
+                    conversationId = groupId + "::" + qq;
+                    log.info("临时切换上下文：{} -> {}", event.getUserId(), qq);
+                }
+            } catch (Exception ignored) {
             }
-        } catch (Exception ignored) {
+
+
+            // 清除当前用户上下文
+            if (text.startsWith("!!") || text.startsWith("！！")) {
+                aiHandler.clear(conversationId);
+                text = text.substring(2);
+            }
+
+            // 生成AI回复
+            response = aiHandler.generateAnswer(pluginAi, text, conversationId);
+            log.info("AI： {}", response);
         }
-
-
-        // 清除当前用户上下文
-        if (text.startsWith("!!") || text.startsWith("！！")) {
-            aiHandler.clear(conversationId);
-            text = text.substring(2);
-        }
-
-        // 生成AI回复
-        ChatResponse response = aiHandler.generateAnswer(pluginAi, text, conversationId);
-        log.info("AI： {}", response);
 
         botHelper.reply(event, response.getResult());
         if (Objects.equals(pluginAi.getTts(), 1)) {
