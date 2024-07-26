@@ -8,6 +8,7 @@ import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
+import com.mikuac.shiro.enums.MsgTypeEnum;
 import com.mikuac.shiro.model.ArrayMsg;
 import com.zh.sbbot.annotation.Admin;
 import com.zh.sbbot.config.SystemSetting;
@@ -314,6 +315,22 @@ public class SystemPlugin {
     public void base64(AnyMessageEvent event) {
         String param = BotUtil.base64(ShiroUtils.unescape(event.getMessage()));
         botHelper.reply(event, param, true);
+    }
+
+
+    /**
+     * 发送表情回复
+     */
+    @AnyMessageHandler
+    @MessageHandlerFilter(startWith = ".emoji")
+    public void emojiLike(AnyMessageEvent event) {
+        event.getArrayMsg().stream()
+                .filter(m -> m.getType() == MsgTypeEnum.face)
+                .map(ArrayMsg::getData)
+                .map(m -> m.getOrDefault("id", null))
+                .forEach(m -> {
+                    botHelper.sendEmojiLike(String.valueOf(event.getMessageId()), m);
+                });
     }
 
 

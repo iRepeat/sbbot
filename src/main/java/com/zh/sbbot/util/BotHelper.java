@@ -115,6 +115,18 @@ public class BotHelper {
         getBot().customRequest(() -> "set_qq_avatar", params);
     }
 
+
+    /**
+     * 拓展api-发送表情回应
+     * <a href="https://bot.q.qq.com/wiki/develop/api-v2/openapi/emoji/model.html#EmojiType">see</a>
+     */
+    public void sendEmojiLike(String messageId,String emojiId) {
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("message_id", messageId);
+        params.put("emoji_id", emojiId);
+        getBot().customRequest(() -> "set_msg_emoji_like", params);
+    }
+
     /**
      * 获取默认bot
      */
