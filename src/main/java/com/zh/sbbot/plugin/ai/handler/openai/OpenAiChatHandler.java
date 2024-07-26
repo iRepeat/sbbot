@@ -50,7 +50,7 @@ public class OpenAiChatHandler implements AiHandler {
 
     @Override
     public String defaultModel() {
-        return "gpt-3.5-turbo";
+        return "gpt-4o-mini";
     }
 
     @Override
