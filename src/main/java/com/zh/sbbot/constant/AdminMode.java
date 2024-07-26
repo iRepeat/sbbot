@@ -1,6 +1,6 @@
 package com.zh.sbbot.constant;
 
-import com.zh.sbbot.configs.SystemSetting;
+import com.zh.sbbot.config.SystemSetting;
 
 /**
  * 权限类型枚举
