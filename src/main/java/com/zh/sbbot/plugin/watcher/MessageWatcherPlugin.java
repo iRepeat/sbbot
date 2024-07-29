@@ -16,6 +16,7 @@ import com.zh.sbbot.plugin.ai.handler.AiHandler;
 import com.zh.sbbot.plugin.ai.handler.AiHandlerSelector;
 import com.zh.sbbot.plugin.ai.support.ChatResponse;
 import com.zh.sbbot.repository.DictRepository;
+import com.zh.sbbot.util.BotHelper;
 import com.zh.sbbot.util.BotUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,7 @@ public class MessageWatcherPlugin {
     private final DictRepository dictRepository;
     private final AiHandlerSelector aiHandlerSelector;
     private final PluginAiRepository pluginAiRepository;
+    private final BotHelper botHelper;
 
     /*
      * AI复读
@@ -83,6 +85,13 @@ public class MessageWatcherPlugin {
         if (typeEnums.size() == 1 && Arrays.asList(face, dice, new_dice, basketball, rps, new_rps, mface, marketface, at)
                 .contains(typeEnums.get(0))) {
             bot.sendGroupMsg(event.getGroupId(), event.getArrayMsg(), false);
+            if (typeEnums.get(0).equals(face)) {
+                event.getArrayMsg().stream().map(ArrayMsg::getData)
+                        .map(m -> m.getOrDefault("id", null))
+                        .forEach(m -> {
+                            botHelper.sendEmojiLike(String.valueOf(event.getMessageId()), m);
+                        });
+            }
         }
     }
 
