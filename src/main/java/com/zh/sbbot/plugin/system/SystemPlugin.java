@@ -18,6 +18,7 @@ import com.zh.sbbot.repository.DictRepository;
 import com.zh.sbbot.util.BotHelper;
 import com.zh.sbbot.util.BotUtil;
 import com.zh.sbbot.util.CommandExecutor;
+import com.zh.sbbot.util.DownloadUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -290,8 +291,9 @@ public class SystemPlugin {
     @Admin(mode = AdminMode.GROUP_ADMIN)
     @MessageHandlerFilter(startWith = ".avatar", at = AtEnum.NOT_NEED)
     public void avatar(AnyMessageEvent event, Matcher matcher) {
-        List<String> imgList = ShiroUtils.getMsgImgUrlList(event.getArrayMsg());
-        if (CollectionUtils.isEmpty(imgList)) {
+        String image = ShiroUtils.getMsgImgUrlList(event.getArrayMsg()).stream()
+                .findFirst().or(() -> Optional.ofNullable(BotUtil.getParam(matcher))).orElse(null);
+        if (StringUtils.isBlank(image)) {
             // 获取今天周几
             int week = (Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1) % 7;
             // 文件转base64
@@ -299,10 +301,15 @@ public class SystemPlugin {
             String base64Img = new String(Base64.getEncoder().encode(FileUtils.readFileToByteArray(new File(file))));
             botHelper.setSelfAvatar("base64://" + base64Img);
             log.info("更换每日头像：{}", file);
+        } else if (image.startsWith("http")) {
+            String b64 = DownloadUtil.downloadIntoMemory(image);
+            botHelper.setSelfAvatar("base64://" + b64);
+            log.info("头像已更换：{}", image);
         } else {
-            botHelper.setSelfAvatar(imgList.get(0));
-            log.info("头像已更换：{}", imgList.get(0));
+            botHelper.setSelfAvatar(image);
+            log.info("头像已更换：{}", image);
         }
+
     }
 
 
