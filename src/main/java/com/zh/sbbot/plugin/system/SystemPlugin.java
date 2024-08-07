@@ -301,15 +301,11 @@ public class SystemPlugin {
             String base64Img = new String(Base64.getEncoder().encode(FileUtils.readFileToByteArray(new File(file))));
             botHelper.setSelfAvatar("base64://" + base64Img);
             log.info("更换每日头像：{}", file);
-        } else if (image.startsWith("http")) {
+        } else {
             String b64 = DownloadUtil.downloadIntoMemory(image);
             botHelper.setSelfAvatar("base64://" + b64);
             log.info("头像已更换：{}", image);
-        } else {
-            botHelper.setSelfAvatar(image);
-            log.info("头像已更换：{}", image);
         }
-
     }
 
 

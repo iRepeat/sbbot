@@ -109,9 +109,9 @@ public class BotHelper {
     /**
      * 拓展api-设置头像
      */
-    public void setSelfAvatar(String url) {
+    public void setSelfAvatar(String file) {
         Map<String, Object> params = Maps.newHashMap();
-        params.put("file", url);
+        params.put("file", file);
         getBot().customRequest(() -> "set_qq_avatar", params);
     }
 
