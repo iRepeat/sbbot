@@ -134,7 +134,7 @@ public class SystemPlugin {
 
         try {
             String result = CommandExecutor.execute(param, 30000);
-            if (StringUtils.isBlank(result)) botHelper.reply(event, "（命令返回空）");
+            if (StringUtils.isBlank(result)) log.info("（命令返回空）");
             else if (result.trim().startsWith("{\"app\"")) {
                 log.info("发送json数据：{}", result);
                 bot.sendMsg(event, ArrayMsgUtils.builder().json(result).build(), false);
@@ -144,6 +144,7 @@ public class SystemPlugin {
             } else {
                 botHelper.reply(event, result);
             }
+            botHelper.sendEmojiLike(String.valueOf(event.getMessageId()), "124");
         } catch (Exception e) {
             log.error("执行命令失败！", e);
             botHelper.reply(event, "执行命令失败！\n" + e.getMessage());
