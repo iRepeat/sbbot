@@ -320,8 +320,17 @@ public class SystemPlugin {
     public void group_avatar(GroupMessageEvent event, Matcher matcher) {
         String image = ShiroUtils.getMsgImgUrlList(event.getArrayMsg()).stream()
                 .findFirst().or(() -> Optional.ofNullable(BotUtil.getParam(matcher))).orElse(null);
-        if (StringUtils.isNotBlank(image)) {
-            botHelper.setGroupAvatar(image, String.valueOf(event.getGroupId()));
+        if (StringUtils.isBlank(image)) {
+            // 获取今天周几
+            int week = (Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1) % 7;
+            // 文件转base64
+            String file = "./image/avatar_group_week" + week + ".jpg";
+            String base64Img = new String(Base64.getEncoder().encode(FileUtils.readFileToByteArray(new File(file))));
+            botHelper.setGroupAvatar("base64://" + base64Img, String.valueOf(event.getGroupId()));
+            log.info("群聊更换每日头像：{}", file);
+        } else {
+            String b64 = DownloadUtil.downloadIntoMemory(image);
+            botHelper.setGroupAvatar("base64://" + b64, String.valueOf(event.getGroupId()));
             log.info("群聊头像已更换：{}", image);
         }
     }
