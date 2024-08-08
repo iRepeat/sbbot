@@ -117,6 +117,17 @@ public class BotHelper {
 
 
     /**
+     * 拓展api-设置群聊头像
+     */
+    public void setGroupAvatar(String file, String groupCode) {
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("file", file);
+        params.put("groupCode", groupCode);
+        getBot().customRequest(() -> "set_group_head", params);
+    }
+
+
+    /**
      * 拓展api-发送表情回应
      * <a href="https://bot.q.qq.com/wiki/develop/api-v2/openapi/emoji/model.html#EmojiType">see</a>
      */

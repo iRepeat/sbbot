@@ -1,12 +1,14 @@
 package com.zh.sbbot.plugin.system;
 
 import com.mikuac.shiro.annotation.AnyMessageHandler;
+import com.mikuac.shiro.annotation.GroupMessageHandler;
 import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
+import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.mikuac.shiro.enums.MsgTypeEnum;
 import com.mikuac.shiro.model.ArrayMsg;
@@ -305,6 +307,31 @@ public class SystemPlugin {
             String b64 = DownloadUtil.downloadIntoMemory(image);
             botHelper.setSelfAvatar("base64://" + b64);
             log.info("头像已更换：{}", image);
+        }
+    }
+
+    /**
+     * 设置群聊头像
+     */
+    @SneakyThrows
+    @GroupMessageHandler
+    @Admin(mode = AdminMode.GROUP_ADMIN)
+    @MessageHandlerFilter(startWith = ".group_avatar", at = AtEnum.NOT_NEED)
+    public void group_avatar(GroupMessageEvent event, Matcher matcher) {
+        String image = ShiroUtils.getMsgImgUrlList(event.getArrayMsg()).stream()
+                .findFirst().or(() -> Optional.ofNullable(BotUtil.getParam(matcher))).orElse(null);
+        if (StringUtils.isBlank(image)) {
+            // 获取今天周几
+            int week = (Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1) % 7;
+            // 文件转base64
+            String file = "./image/avatar_group_week" + week + ".jpg";
+            String base64Img = new String(Base64.getEncoder().encode(FileUtils.readFileToByteArray(new File(file))));
+            botHelper.setGroupAvatar("base64://" + base64Img, String.valueOf(event.getGroupId()));
+            log.info("群聊更换每日头像：{}", file);
+        } else {
+            String b64 = DownloadUtil.downloadIntoMemory(image);
+            botHelper.setGroupAvatar("base64://" + b64, String.valueOf(event.getGroupId()));
+            log.info("群聊头像已更换：{}", image);
         }
     }
 
