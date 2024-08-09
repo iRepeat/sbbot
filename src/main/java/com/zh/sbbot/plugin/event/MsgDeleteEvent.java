@@ -8,6 +8,7 @@ import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.notice.GroupMsgDeleteNoticeEvent;
 import com.mikuac.shiro.dto.event.notice.PrivateMsgDeleteNoticeEvent;
+import com.zh.sbbot.config.SystemSetting;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -22,17 +23,23 @@ import org.springframework.stereotype.Component;
 @SuppressWarnings("unused")
 public class MsgDeleteEvent {
 
+    private final SystemSetting systemSetting;
+
     @GroupMsgDeleteNoticeHandler
     public void onMsgDelete(GroupMsgDeleteNoticeEvent event, Bot bot) {
-        log.info("{}撤回了一条消息：{}", event.getUserId(), event);
-        String msg = MsgUtils.builder().face(269).reply(Math.toIntExact(event.getMessageId())).build();
-        bot.sendGroupMsg(event.getGroupId(), msg, false);
+        if (systemSetting.isEnable()) {
+            log.info("{}撤回了一条消息：{}", event.getUserId(), event);
+            String msg = MsgUtils.builder().face(269).reply(Math.toIntExact(event.getMessageId())).build();
+            bot.sendGroupMsg(event.getGroupId(), msg, false);
+        }
     }
 
     @PrivateMsgDeleteNoticeHandler
     public void onPrivateMsgDelete(PrivateMsgDeleteNoticeEvent event, Bot bot) {
-        log.info("{}撤回了一条消息：{}", event.getUserId(), event);
-        String msg = MsgUtils.builder().face(269).reply(Math.toIntExact(event.getMessageId())).build();
-        bot.sendPrivateMsg(event.getUserId(), msg, false);
+        if (systemSetting.isEnable()) {
+            log.info("{}撤回了一条消息：{}", event.getUserId(), event);
+            String msg = MsgUtils.builder().face(269).reply(Math.toIntExact(event.getMessageId())).build();
+            bot.sendPrivateMsg(event.getUserId(), msg, false);
+        }
     }
 }
