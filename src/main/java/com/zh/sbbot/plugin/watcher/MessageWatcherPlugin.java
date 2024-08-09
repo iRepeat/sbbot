@@ -85,13 +85,6 @@ public class MessageWatcherPlugin {
         if (typeEnums.size() == 1 && Arrays.asList(face, dice, new_dice, basketball, rps, new_rps, mface, marketface, at)
                 .contains(typeEnums.get(0))) {
             bot.sendGroupMsg(event.getGroupId(), event.getArrayMsg(), false);
-            if (typeEnums.get(0).equals(face)) {
-                event.getArrayMsg().stream().map(ArrayMsg::getData)
-                        .map(m -> m.getOrDefault("id", null))
-                        .forEach(m -> {
-                            botHelper.sendEmojiLike(String.valueOf(event.getMessageId()), m);
-                        });
-            }
         }
     }
 
