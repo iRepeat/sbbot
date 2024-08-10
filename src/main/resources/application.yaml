@@ -75,7 +75,7 @@ shiro:
         secret-key: xxx
         accurate: false
 
-  interceptor: com.zh.sbbot.interceptor.CustomInterceptor
+  interceptor: com.zh.sbbot.custom.CustomMessageEventInterceptor
   plugin:
     ai:
       qwen: # 通义千问配置。可通过dict表配置
