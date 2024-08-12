@@ -22,9 +22,10 @@ public class InjectionHandlerAdvice {
     private void invokeMethods() {
     }
 
-    @Pointcut("execution(public * com.mikuac.shiro.handler.injection.InjectionHandler.invokePrivateMessage(..)) " +
-            "||execution(public * com.mikuac.shiro.handler.injection.InjectionHandler.invokeGroupMessage(..)) " +
-            "|| execution(public * com.mikuac.shiro.handler.injection.InjectionHandler.invokeHeartbeat(..))")
+    /**
+     * 排除心跳检测事件
+     */
+    @Pointcut(" execution(public * com.mikuac.shiro.handler.injection.InjectionHandler.invokeHeartbeat(..))")
     private void excludedMethods() {
     }
 
