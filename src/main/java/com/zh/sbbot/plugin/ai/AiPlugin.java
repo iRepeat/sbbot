@@ -126,7 +126,8 @@ public class AiPlugin {
             try {
                 if (!botHelper.isSuperUser(event.getUserId()))
                     throw new RuntimeException("非SU不能执行命令！");
-                text = CommandExecutor.execute(cmd, 10 * 1000);
+                String result = CommandExecutor.execute(cmd, 10 * 1000);
+                text = text.replace(execMatcher.group(0), result);
             } catch (Exception e) {
                 botHelper.reply(event, "命令执行失败：【%s】 => 【%s】".formatted(cmd, e.getMessage()));
                 return null;
