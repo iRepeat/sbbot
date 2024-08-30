@@ -11,7 +11,6 @@ import com.zh.sbbot.plugin.ai.dao.PluginAi;
 import com.zh.sbbot.plugin.ai.handler.AiHandler;
 import com.zh.sbbot.plugin.ai.handler.AiHandlerSelector;
 import com.zh.sbbot.plugin.ai.support.ChatResponse;
-import com.zh.sbbot.plugin.ai.support.VendorEnum;
 import com.zh.sbbot.util.BotHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +47,7 @@ public class PokeEvent {
     }
 
     private String getAiResponse() {
-        AiHandler ai = aiHandlerSelector.get(VendorEnum.qwen.name());
+        AiHandler ai = aiHandlerSelector.getDefault();
         PluginAi option = PluginAi.defaultConfig(null, ai.vendor(), ai.defaultModel());
         option.setSystemTemplate("你的脾气非常暴躁易怒");
         option.setTemperature("0.9");
