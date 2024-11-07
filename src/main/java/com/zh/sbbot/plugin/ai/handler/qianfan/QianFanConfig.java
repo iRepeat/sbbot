@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @EqualsAndHashCode(callSuper = true)
-@ConfigurationProperties("shiro.plugin.ai.qianfan")
+@ConfigurationProperties("plugin.ai.qianfan")
 @Configuration
 @Data
 public class QianFanConfig extends ConfigurationInitializer {

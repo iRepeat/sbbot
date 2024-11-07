@@ -62,27 +62,27 @@ shiro:
     max-pool-size: 30
     # 线程池名前缀
     thread-name-prefix: "ShiroTaskPool-"
-
-  system: # 系统配置。可通过dict表配置
-    super-user:
-      - 123456789
-      - 987654321
-    enable: true
-    ocr:
-      baidu:
-        api-key: xxx
-        app-id: xxx
-        secret-key: xxx
-        accurate: false
-
   interceptor: com.zh.sbbot.custom.CustomMessageEventInterceptor
-  plugin:
-    ai:
-      qwen: # 通义千问配置。可通过dict表配置
-        api-key: sk-xxx
 
-      qianfan: # 千帆大模型配置。可通过dict表配置
-        access-key: xxx
-        secret-key: xxx
+
+system: # 系统配置。可通过dict表配置
+  super-user:
+    - 123456789
+    - 987654321
+  enable: true
+  ocr:
+    baidu:
+      api-key: xxx
+      app-id: xxx
+      secret-key: xxx
+      accurate: false
+plugin: # 插件配置。可通过dict表配置
+  ai:
+    qwen: # 通义千问配置
+      api-key: sk-xxx
+
+    qianfan: # 千帆大模型配置
+      access-key: xxx
+      secret-key: xxx
 
 

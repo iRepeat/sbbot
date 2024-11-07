@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @EqualsAndHashCode(callSuper = true)
-@ConfigurationProperties("shiro.system.ocr.baidu")
+@ConfigurationProperties("system.ocr.baidu")
 @Configuration
 @Data
 public class BaiduOCRConfig extends ConfigurationInitializer {

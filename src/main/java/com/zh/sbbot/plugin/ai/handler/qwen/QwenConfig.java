@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @EqualsAndHashCode(callSuper = true)
-@ConfigurationProperties(prefix = "shiro.plugin.ai.qwen")
+@ConfigurationProperties(prefix = "plugin.ai.qwen")
 @Configuration
 @Data
 public class QwenConfig extends ConfigurationInitializer {

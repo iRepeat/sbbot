@@ -209,7 +209,7 @@ public class AiPlugin {
         switch (action) {
             case "reset":
                 if (botHelper.isSuperUser(event.getUserId())) {
-                    pluginAiRepository.initTable();
+                    pluginAiRepository.resetTable();
                     botHelper.reply(event, "初始化表成功");
                 }
                 break;

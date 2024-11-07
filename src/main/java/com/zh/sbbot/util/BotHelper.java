@@ -15,10 +15,7 @@ import com.zh.sbbot.repository.DictRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * 结合了spring上下文的bot工具类
@@ -111,10 +108,10 @@ public class BotHelper {
     }
 
     /**
-     * 发送消息给默认用户（{@link  DictKey#PLUGIN_EVENT_RECEIVE_USER}）
+     * 发送消息给默认用户（{@link  DictKey#SYSTEM_EVENT_RECEIVE_USER}）
      */
     public void sendToDefault(String text) {
-        Optional.ofNullable(dictRepository.get(DictKey.PLUGIN_EVENT_RECEIVE_USER, Long.class))
+        Optional.ofNullable(dictRepository.get(DictKey.SYSTEM_EVENT_RECEIVE_USER, Long.class))
                 .ifPresent(userId -> getBot().sendPrivateMsg(userId, text, false));
     }
 
@@ -189,7 +186,7 @@ public class BotHelper {
      * 根据Id获取bot
      */
     public Bot getBot(Long botId) {
-        return botContainer.robots.get(botId);
+        return botId == null ? null : botContainer.robots.get(botId);
     }
 
 }

@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "shiro.system")
+@ConfigurationProperties(prefix = "system")
 @Getter
 @Setter
 public class SystemSetting extends ConfigurationInitializer {

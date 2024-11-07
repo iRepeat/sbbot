@@ -27,6 +27,7 @@ public class AiHandlerSelector implements ApplicationContextAware {
     @Override
     public void setApplicationContext(@NotNull ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+        pluginAiRepository.createTable();
         List<PluginAi> pluginAis = pluginAiRepository.getAll();
         pluginAis.forEach(pluginAi -> {
             AiHandler aiHandler = get(pluginAi.getVendor());

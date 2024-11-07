@@ -34,8 +34,15 @@ public class PluginAiRepository {
     /**
      * 初始化表
      */
-    public void initTable() {
+    public void resetTable() {
         jdbcTemplate.execute("DROP TABLE IF EXISTS plugin_ai");
+        createTable();
+    }
+
+    /**
+     * 创建表
+     */
+    public void createTable() {
         String createTableSql = dictRepository.get(DictKey.PLUGIN_AI_CREATE_SQL);
         jdbcTemplate.execute(createTableSql);
     }
