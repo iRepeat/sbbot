@@ -26,6 +26,32 @@ public class BotUtil {
 
 
     /**
+     * 提取指令参数。消息不含指令参数时返回空字符串
+     * <p>
+     * 指令参数：消息【.say|text hello】中，text是指令参数
+     */
+    public static String getCommandParam(Matcher matcher) {
+        return getCommandParam(matcher, 2);
+    }
+
+    /**
+     * 提取指令参数。消息不含指令参数时返回空字符串
+     * <p>
+     * 指令参数：消息【.say|text hello】中，text是指令参数
+     */
+    public static String getCommandParam(Matcher matcher, int groupNo) {
+        return Optional.ofNullable(matcher)
+                .map(m -> m.group(groupNo))
+                .map(StringUtils::trim)
+                .filter(s -> s.startsWith("|"))
+                .map(s -> s.replaceAll("^\\|(\\S+).*", "$1"))
+                .map(String::trim)
+                .filter(StringUtils::isNotBlank)
+                .orElse(StringUtils.EMPTY);
+    }
+
+
+    /**
      * 提取消息参数，解密base64
      */
     public static @Nullable String getParam(Matcher matcher) {
@@ -36,7 +62,12 @@ public class BotUtil {
      * 提取消息参数，解密base64
      */
     public static @Nullable String getParam(Matcher matcher, int groupNo) {
-        String param = Optional.ofNullable(matcher).map(m -> m.group(groupNo)).map(String::trim).filter(StringUtils::isNotBlank).orElse(null);
+        String param = Optional.ofNullable(matcher)
+                .map(m -> m.group(groupNo))
+                .map(s -> s.replaceFirst("^\\|\\S*\\s*", ""))
+                .map(String::trim)
+                .filter(StringUtils::isNotBlank)
+                .orElse(null);
         return base64(param);
     }
 

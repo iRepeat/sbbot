@@ -128,11 +128,11 @@ public class BotHelper {
     /**
      * 拓展api-设置群聊头像
      */
-    public void setGroupAvatar(String file, String groupCode) {
+    public void setGroupAvatar(String file, Long groupCode) {
         Map<String, Object> params = new HashMap<>();
         params.put("file", file);
-        params.put("groupCode", groupCode);
-        getBot().customRequest(() -> "set_group_head", params);
+        params.put("group_id", groupCode);
+        getBot().customRequest(() -> "set_group_portrait", params);
     }
 
 
