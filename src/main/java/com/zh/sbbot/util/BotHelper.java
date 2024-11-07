@@ -158,6 +158,28 @@ public class BotHelper {
     }
 
     /**
+     * 拓展api-发送群聊AI语音
+     */
+    public void sendGroupAiRecord(Long groupId, String character, String text) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("group_id", groupId);
+        params.put("character", character);
+        params.put("text", text);
+        getBot().customRequest(() -> "send_group_ai_record", params);
+    }
+    /**
+     * 拓展api-获取AI语音链接
+     */
+    public String getAiRecord(Long groupId, String character, String text) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("group_id", groupId);
+        params.put("character", character);
+        params.put("text", text);
+        ActionData<?> actionData = getBot().customRequest(() -> "get_ai_record", params);
+        return Optional.ofNullable(actionData).map(ActionData::getData).map(Object::toString).orElse(null);
+    }
+
+    /**
      * 自定义拓展api
      */
     public ActionData<?> sendCustomRequest(String apiName, String json) {

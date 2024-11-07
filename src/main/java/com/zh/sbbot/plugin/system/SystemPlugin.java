@@ -19,10 +19,7 @@ import com.zh.sbbot.config.SystemSetting;
 import com.zh.sbbot.constant.AdminMode;
 import com.zh.sbbot.repository.AliasRepository;
 import com.zh.sbbot.repository.DictRepository;
-import com.zh.sbbot.util.BotHelper;
-import com.zh.sbbot.util.BotUtil;
-import com.zh.sbbot.util.CommandExecutor;
-import com.zh.sbbot.util.DownloadUtil;
+import com.zh.sbbot.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +51,8 @@ public class SystemPlugin {
     private final BotHelper botHelper;
     private final DictRepository dictRepository;
     private final AliasRepository aliasRepository;
+    private final TTSUtil ttsUtil;
+    private final com.zh.sbbot.util.TTSUtil TTSUtil;
 
     /**
      * 让bot重复你的话
@@ -126,9 +125,15 @@ public class SystemPlugin {
     @MessageHandlerFilter(startWith = ".exec", at = AtEnum.NOT_NEED)
     public void exec(AnyMessageEvent event, Bot bot, Matcher matcher) {
         String param = BotUtil.getParam(matcher);
-        if (StringUtils.isBlank(param)) {
+        if (StringUtils.isBlank(param) || param.equals("|tts")) {
             botHelper.reply(event, "请给定命令");
             return;
+        }
+
+        boolean tts = false;
+        if (param.startsWith("|tts")) {
+            param = param.replaceFirst("\\|tts", "").trim();
+            tts = true;
         }
 
         // 去除转义
@@ -143,7 +148,10 @@ public class SystemPlugin {
             } else if (result.contains("[CQ:record") || result.contains("[CQ:video")) {
                 // 语音消息无法被引用，因此不能使用reply
                 bot.sendMsg(event, result, false);
-            } else {
+            } else if (tts) {
+                String voice = TTSUtil.generate(result);
+                bot.sendMsg(event, ArrayMsgUtils.builder().voice(voice).build(), false);
+            }else {
                 botHelper.reply(event, result);
             }
             botHelper.sendEmojiLike(String.valueOf(event.getMessageId()), "124");

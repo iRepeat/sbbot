@@ -3,7 +3,6 @@ package com.zh.sbbot.plugin.ai;
 import com.mikuac.shiro.annotation.GroupMessageHandler;
 import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
-import com.mikuac.shiro.common.utils.ArrayMsgUtils;
 import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.action.common.ActionData;
@@ -12,12 +11,14 @@ import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.mikuac.shiro.enums.MsgTypeEnum;
 import com.zh.sbbot.annotation.Admin;
+import com.zh.sbbot.config.QQTTSConfig;
 import com.zh.sbbot.constant.AdminMode;
 import com.zh.sbbot.plugin.ai.dao.PluginAi;
 import com.zh.sbbot.plugin.ai.dao.PluginAiRepository;
 import com.zh.sbbot.plugin.ai.handler.AiHandler;
 import com.zh.sbbot.plugin.ai.handler.AiHandlerSelector;
 import com.zh.sbbot.plugin.ai.support.ChatResponse;
+import com.zh.sbbot.repository.DictRepository;
 import com.zh.sbbot.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,38 @@ public class AiPlugin {
     private final BotHelper botHelper;
     private final TTSUtil ttsUtil;
     private final OCRUtil ocrUtil;
+    private final DictRepository dictRepository;
+    private final QQTTSConfig config;
+
+    /**
+     * 获取用户上下文标识
+     */
+    private static @NotNull String getConversationId(GroupMessageEvent event, Bot bot, Long groupId) {
+        // 当前用户的会话ID
+        String conversationId = groupId + "::" + event.getUserId();
+
+        try {
+            // 如果是回复机器人信息，则使用机器人所回复的用户的上下文
+            ActionData<GetMsgResp> msgId = bot.getMsg(Integer.parseInt(event.getArrayMsg()
+                    .stream()
+                    .filter(it -> it.getType() == MsgTypeEnum.reply)
+                    .findFirst()
+                    .orElseThrow()
+                    .getData()
+                    .get("id")));
+            String qq = BotUtil.parseArrayMsg(msgId.getData().getMessage())
+                    .stream()
+                    .filter(it -> it.getType() == MsgTypeEnum.at)
+                    .findFirst()
+                    .orElseThrow()
+                    .getData()
+                    .get("qq");
+            conversationId = event.getGroupId() + "::" + qq;
+            log.info("临时切换上下文：{} -> {}", event.getUserId(), qq);
+        } catch (Exception ignored) {
+        }
+        return conversationId;
+    }
 
     @GroupMessageHandler
     @MessageHandlerFilter(at = AtEnum.NEED)
@@ -85,8 +118,7 @@ public class AiPlugin {
 
         // TTS回复
         if (Objects.equals(pluginAi.getTts(), 1)) {
-            String base64 = ttsUtil.generateToBase64(response.getResult());
-            bot.sendGroupMsg(groupId, ArrayMsgUtils.builder().voice("base64://" + base64).build(), false);
+            botHelper.sendGroupAiRecord(groupId, config.getCharacter(), response.getResult());
         }
 
         if (response.isClearHistory()) {
@@ -147,36 +179,6 @@ public class AiPlugin {
             return null;
         }
         return text;
-    }
-
-    /**
-     * 获取用户上下文标识
-     */
-    private static @NotNull String getConversationId(GroupMessageEvent event, Bot bot, Long groupId) {
-        // 当前用户的会话ID
-        String conversationId = groupId + "::" + event.getUserId();
-
-        try {
-            // 如果是回复机器人信息，则使用机器人所回复的用户的上下文
-            ActionData<GetMsgResp> msgId = bot.getMsg(Integer.parseInt(event.getArrayMsg()
-                    .stream()
-                    .filter(it -> it.getType() == MsgTypeEnum.reply)
-                    .findFirst()
-                    .orElseThrow()
-                    .getData()
-                    .get("id")));
-            String qq = BotUtil.parseArrayMsg(msgId.getData().getMessage())
-                    .stream()
-                    .filter(it -> it.getType() == MsgTypeEnum.at)
-                    .findFirst()
-                    .orElseThrow()
-                    .getData()
-                    .get("qq");
-            conversationId = event.getGroupId() + "::" + qq;
-            log.info("临时切换上下文：{} -> {}", event.getUserId(), qq);
-        } catch (Exception ignored) {
-        }
-        return conversationId;
     }
 
     @Admin(mode = AdminMode.GROUP_ADMIN)

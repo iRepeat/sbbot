@@ -1,5 +1,7 @@
 package com.zh.sbbot.util;
 
+import com.zh.sbbot.config.QQTTSConfig;
+import com.zh.sbbot.constant.DictKey;
 import com.zh.sbbot.repository.DictRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -16,22 +18,31 @@ import java.util.Base64;
 public class TTSUtil {
 
     private final DictRepository dictRepository;
-
-    public static TTSUtil instance() {
-        return new TTSUtil(null);
-    }
+    private final BotHelper botHelper;
+    private final QQTTSConfig qqConfig;
 
     /**
-     * @return 音频文件路径
+     * @return https/http/base64/file协议的音频
      */
     public String generate(String content) {
-        log.info("not yet implemented");
-        return null;
+        String res = null;
+        switch (dictRepository.get(DictKey.TTS_TYPE)) {
+            case "qq" -> res = generateWithQQ(content);
+            default -> log.info("not yet implemented");
+        }
+        return res;
     }
 
+    private String generateWithQQ(String content) {
+        Long groupId = qqConfig.getGroup();
+        String character = qqConfig.getCharacter();
+        return botHelper.getAiRecord(groupId, character, content);
+    }
+
+
     @SneakyThrows
-    public String generateToBase64(String content) {
-        File file = new File(generate(content));
+    public String fileToBase64(String filePath) {
+        File file = new File(filePath);
         byte[] fileBytes = FileUtils.readFileToByteArray(file);
 
         // 将文件字节编码为Base64
