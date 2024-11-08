@@ -49,7 +49,7 @@ public class ToolPlugin {
     public void say(Bot bot, AnyMessageEvent event, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher)).ifPresent(s -> {
             switch (BotUtil.getCommandParam(matcher)) {
-                case "text" -> {
+                case "plain" -> {
                     // 文本形式发送，媒体信息或表情等会转译为CQ码
                     bot.sendMsg(event, ShiroUtils.unescape(s), true);
                 }
