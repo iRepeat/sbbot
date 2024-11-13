@@ -32,7 +32,10 @@ public class ExceptionAspect {
                 .orElseGet(() -> e == null ? "请检查日志" : e.getClass().getSimpleName());
     }
 
-    @AfterThrowing(pointcut = "execution(* com.zh.sbbot.plugin..*(..))", throwing = "e")
+    @AfterThrowing(pointcut = "execution(* com.zh.sbbot.plugin..*(..)) && (" +
+            "@within(com.mikuac.shiro.annotation.common.Shiro) || " +
+            "@within(org.springframework.web.bind.annotation.RestController))",
+            throwing = "e")
     public void handleGenericException(Exception e) {
         String message = "发生异常：\n【%s】\n👇\n【%s】".formatted(getStackTrace(e), e.getLocalizedMessage());
         log.error(message);
