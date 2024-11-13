@@ -8,10 +8,6 @@ spring:
     driver-class-name: org.sqlite.JDBC
     url: "jdbc:sqlite:./sbbot.db"
 
-  ai:
-    openai: # openai配置
-      api-key: "sk-xxx"
-      base-url: "http://xxx.com"
 
 
 server:
