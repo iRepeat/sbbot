@@ -27,11 +27,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static com.zh.sbbot.util.BotUtil.getText;
 
@@ -94,12 +96,35 @@ public class AiPlugin {
 
         // 解析消息
         String text = parseText(event);
-        if (text == null) return;
+
+        // 解析消息中的图片，转为base64
+        Function<String, String> urlToBase64 = url -> {
+            try {
+                String b64 = DownloadUtil.downloadIntoMemory(url);
+                return "data:image/jpeg;base64," + b64;
+            } catch (Exception ignored) {
+                log.info("图片下载失败：{}", url);
+            }
+            return StringUtils.EMPTY;
+        };
+        List<String> images = ShiroUtils.getMsgImgUrlList(event.getArrayMsg()).stream().map(urlToBase64).filter(StringUtils::isNoneBlank).toList();
+
+        // 不允许文字和图片同时为空
+        if (StringUtils.isBlank(text) && CollectionUtils.isEmpty(images)) {
+            botHelper.reply(event, "?");
+            return;
+        }
+
+        if (CollectionUtils.isEmpty(images)) {
+            log.info("问题：{} ", text);
+        } else {
+            log.info("问题：{}，图片：{}", text, images);
+        }
 
         ChatResponse response;
         if (text.startsWith("##")) {
             // 进行单次对话（不携带上下文，不会保留历史）
-            response = aiHandler.generateAnswer(pluginAi, text);
+            response = aiHandler.chat(pluginAi, text, images);
         } else {
             // 获取当前用户的会话ID
             String conversationId = getConversationId(event, bot, groupId);
@@ -109,7 +134,7 @@ public class AiPlugin {
                 text = text.substring(2);
             }
             // 生成AI回复
-            response = aiHandler.generateAnswer(pluginAi, text, conversationId);
+            response = aiHandler.chat(pluginAi, text, images, conversationId);
         }
 
         log.info("AI： {}", response);
@@ -149,7 +174,7 @@ public class AiPlugin {
      * 1. 对图片进行OCR文本提取
      * 2. 将``包裹的消息内容作为系统命令执行，并替换为执行结果
      */
-    private @Nullable String parseText(GroupMessageEvent event) {
+    private String parseText(GroupMessageEvent event) {
         String text = getText(event.getArrayMsg());
         Matcher execMatcher = Pattern.compile("`(.*?)`").matcher(text);
 
@@ -162,21 +187,8 @@ public class AiPlugin {
                 text = text.replace(execMatcher.group(0), result);
             } catch (Exception e) {
                 botHelper.reply(event, "命令执行失败：【%s】 => 【%s】".formatted(cmd, e.getMessage()));
-                return null;
+                return StringUtils.EMPTY;
             }
-        }
-
-        text += ShiroUtils.getMsgImgUrlList(event.getArrayMsg())
-                .stream()
-                .map(ocrUtil::baidu)
-                .collect(Collectors.joining(
-                        "\n"));
-        log.info("问题：{} ", text);
-
-        // 不允许问题为空
-        if (StringUtils.isBlank(text)) {
-            botHelper.reply(event, "?");
-            return null;
         }
         return text;
     }

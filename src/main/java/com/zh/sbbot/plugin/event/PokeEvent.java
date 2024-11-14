@@ -51,7 +51,7 @@ public class PokeEvent {
         PluginAi option = PluginAi.defaultConfig(null, ai.vendor(), ai.defaultModel());
         option.setSystemTemplate("你的脾气非常暴躁易怒");
         option.setTemperature("0.9");
-        ChatResponse chatResponse = ai.generateAnswer(option, "你拍你爹爹呢，相似的话有哪些？直接告诉我你的答案，不要做解释不要带引号");
+        ChatResponse chatResponse = ai.chat(option, "你拍你爹爹呢，相似的话有哪些？直接告诉我你的答案，不要做解释不要带引号");
         return chatResponse.getResult();
     }
 }

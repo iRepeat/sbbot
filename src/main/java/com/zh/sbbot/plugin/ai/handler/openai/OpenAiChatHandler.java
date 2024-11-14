@@ -5,12 +5,18 @@ import com.zh.sbbot.plugin.ai.dao.PluginAi;
 import com.zh.sbbot.plugin.ai.handler.AiHandler;
 import com.zh.sbbot.plugin.ai.support.ChatResponse;
 import com.zh.sbbot.plugin.ai.support.VendorEnum;
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -21,7 +27,12 @@ public class OpenAiChatHandler implements AiHandler {
 
 
     @Override
-    public ChatResponse generateAnswer(PluginAi pluginAi, String text, String conversationId) {
+    public ChatResponse chat(PluginAi pluginAi, String text, String conversationId) {
+        return chat(pluginAi, text, null, conversationId);
+    }
+
+    @Override
+    public ChatResponse chat(PluginAi pluginAi, String text, @Nullable List<String> images, String conversationId) {
 
         OpenAiApi openAiApi = new OpenAiApi(openAiConfig.getBaseUrl(), openAiConfig.getApiKey());
 
@@ -29,8 +40,20 @@ public class OpenAiChatHandler implements AiHandler {
         OpenAiApi.ChatCompletionMessage systemMsg = new OpenAiApi.ChatCompletionMessage(pluginAi.getSystemTemplate(),
                 OpenAiApi.ChatCompletionMessage.Role.SYSTEM);
         chatHistory.setSystem(conversationId, systemMsg);
+
+        // 构造用户消息数据
+        ArrayList<OpenAiApi.ChatCompletionMessage.MediaContent> contents = new ArrayList<>();
+
+        if (!CollectionUtils.isEmpty(images)) {
+            images.forEach(image -> contents.add(new OpenAiApi.ChatCompletionMessage.MediaContent(new OpenAiApi.ChatCompletionMessage.MediaContent.ImageUrl(image, "high"))));
+        }
+        if (StringUtils.hasLength(text)) {
+            contents.add(new OpenAiApi.ChatCompletionMessage.MediaContent(text));
+        }
+
         // 添加用户对话到上下文
-        OpenAiApi.ChatCompletionMessage userMsg = new OpenAiApi.ChatCompletionMessage(text, OpenAiApi.ChatCompletionMessage.Role.USER);
+        OpenAiApi.ChatCompletionMessage userMsg = new OpenAiApi.ChatCompletionMessage(contents,
+                OpenAiApi.ChatCompletionMessage.Role.USER);
         chatHistory.add(conversationId, userMsg);
 
 
@@ -64,7 +87,7 @@ public class OpenAiChatHandler implements AiHandler {
             Assert.state(!response.getStatusCode().isError() && response.getBody() != null && !response.getBody().choices().isEmpty(),
                     "AI响应出错：" + JSONObject.toJSONString(response));
 
-            OpenAiApi.ChatCompletionMessage assistantMsg =response.getBody().choices().get(0).message();
+            OpenAiApi.ChatCompletionMessage assistantMsg = response.getBody().choices().get(0).message();
 
             chatHistory.add(conversationId, assistantMsg);
 

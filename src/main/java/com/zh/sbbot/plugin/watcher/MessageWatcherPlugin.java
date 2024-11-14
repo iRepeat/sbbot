@@ -73,7 +73,7 @@ public class MessageWatcherPlugin {
                                 .orElse(PluginAi.defaultConfig(event.getGroupId(), defaultHandler.vendor(), defaultHandler.defaultModel()));
                         if (Objects.equals(pluginAi.getIsDisable(), 0)) {
                             pluginAi.setSystemTemplate("你的职能是为用户的消息添加emoji，直接回复添加emoji后的消息即可，不要做任何解释");
-                            ChatResponse chatResponse = aiHandlerSelector.get(pluginAi.getVendor()).generateAnswer(pluginAi
+                            ChatResponse chatResponse = aiHandlerSelector.get(pluginAi.getVendor()).chat(pluginAi
                                     , "用户的消息是：" + BotUtil.getText(msg));
                             bot.sendGroupMsg(event.getGroupId(), chatResponse.getResult(), false);
                         }
@@ -96,6 +96,7 @@ public class MessageWatcherPlugin {
             bot.sendGroupMsg(event.getGroupId(), event.getArrayMsg(), false);
         }
     }
+
 
     /*
      * 复读模式
