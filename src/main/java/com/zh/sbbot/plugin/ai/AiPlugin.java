@@ -138,12 +138,21 @@ public class AiPlugin {
         }
 
         log.info("AI： {}", response);
-        // 发送消息
-        botHelper.reply(event, response.getResult());
 
         // TTS回复
-        if (Objects.equals(pluginAi.getTts(), 1)) {
-            botHelper.sendGroupAiRecord(groupId, config.getCharacter(), response.getResult());
+        switch (pluginAi.getTts()) {
+            case 1:
+                // 仅tts回复
+                botHelper.sendGroupAiRecord(groupId, config.getCharacter(), response.getResult());
+                break;
+            case 2:
+                // tts+文本回复
+                botHelper.sendGroupAiRecord(groupId, config.getCharacter(), response.getResult());
+                botHelper.reply(event, response.getResult());
+                break;
+            default:
+                // 仅文本回复
+                botHelper.reply(event, response.getResult());
         }
 
         if (response.isClearHistory()) {
