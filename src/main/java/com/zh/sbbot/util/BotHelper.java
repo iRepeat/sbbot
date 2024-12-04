@@ -1,6 +1,7 @@
 package com.zh.sbbot.util;
 
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.TypeReference;
 import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.core.BotContainer;
@@ -14,6 +15,7 @@ import com.zh.sbbot.constant.MemberRole;
 import com.zh.sbbot.repository.DictRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
@@ -37,6 +39,21 @@ public class BotHelper {
      */
     public boolean isSuperUser(Long userId) {
         return Arrays.asList(systemSetting.getSuperUser()).contains(userId);
+    }
+
+    /**
+     * 检查是否是群聊/用户黑名单
+     */
+    public boolean isBlock(Long userOrGroupId) {
+        if (Objects.isNull(userOrGroupId)) {
+            return false;
+        }
+        Set<Long> ids = dictRepository.get(DictKey.SYSTEM_BLOCK_IDS, new TypeReference<>() {
+        });
+        if (CollectionUtils.isEmpty(ids)) {
+            return false;
+        }
+        return ids.contains(userOrGroupId);
     }
 
 

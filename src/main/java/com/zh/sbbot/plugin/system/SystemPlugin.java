@@ -1,13 +1,17 @@
 package com.zh.sbbot.plugin.system;
 
+import com.alibaba.fastjson2.TypeReference;
 import com.mikuac.shiro.annotation.AnyMessageHandler;
 import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.common.utils.ShiroUtils;
+import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.zh.sbbot.annotation.Admin;
 import com.zh.sbbot.config.SystemSetting;
+import com.zh.sbbot.constant.AdminMode;
+import com.zh.sbbot.constant.DictKey;
 import com.zh.sbbot.repository.AliasRepository;
 import com.zh.sbbot.repository.DictRepository;
 import com.zh.sbbot.util.BotHelper;
@@ -22,6 +26,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 
 /**
  * 封装Bot管理、数据库管理、插件管理等命令
@@ -197,6 +202,62 @@ public class SystemPlugin {
                 }
             }
         });
+    }
+
+
+    /**
+     * 黑名单
+     */
+    @AnyMessageHandler
+    @Admin(mode = AdminMode.GROUP_ADMIN)
+    @MessageHandlerFilter(startWith = {".ban", ".block"}, at = AtEnum.NOT_NEED)
+    public void blackList(AnyMessageEvent event, Matcher matcher, Bot bot) {
+
+        Set<Long> paramIds = Optional.ofNullable(BotUtil.getParam(matcher))
+                .map(param -> ShiroUtils.unescape(param).split(","))
+                .map(Set::of)
+                .orElse(Collections.emptySet())
+                .stream()
+                .map(String::trim)
+                .filter(StringUtils::isNotBlank)
+                .map(Long::parseLong)
+                .collect(Collectors.toSet());
+
+
+        if (CollectionUtils.isEmpty(paramIds)) {
+            botHelper.reply(event, "未给定ID");
+            return;
+        }
+
+        Set<Long> dbIds = dictRepository.get(DictKey.SYSTEM_BLOCK_IDS, new TypeReference<>() {
+        });
+        if (CollectionUtils.isEmpty(dbIds)) {
+            dbIds = new HashSet<>();
+        }
+
+        // 移除黑名单
+        if (BotUtil.getCommandParam(matcher).equals("del")) {
+            dbIds.removeAll(paramIds);
+            dictRepository.setOrRemove(DictKey.SYSTEM_BLOCK_IDS, dbIds);
+            botHelper.reply(event, "已移除黑名单：" + paramIds);
+            return;
+        }
+
+        if (paramIds.containsAll(Set.of(systemSetting.getSuperUser()))) {
+            if (botHelper.isSuperUser(event.getUserId())){
+                botHelper.reply(event, "超级用户无法被拉黑");
+                paramIds.removeAll(Set.of(systemSetting.getSuperUser()));
+            }else{
+                botHelper.reply(event, "监测到非法调用，您将被拉黑");
+                bot.setGroupBan(event.getGroupId(), event.getUserId(), 10 * 60);
+                paramIds = Set.of(event.getUserId());
+            }
+        }
+
+        dbIds.addAll(paramIds);
+        dictRepository.setOrRemove(DictKey.SYSTEM_BLOCK_IDS, dbIds);
+        botHelper.reply(event, "已拉黑：" + paramIds);
+
     }
 
 }

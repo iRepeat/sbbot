@@ -26,7 +26,7 @@ public class TTSUtil {
      */
     public String generate(String content) {
         String res = null;
-        switch (dictRepository.get(DictKey.TTS_TYPE)) {
+        switch (dictRepository.get(DictKey.SYSTEM_TTS_TYPE)) {
             case "qq" -> res = generateWithQQ(content);
             default -> log.info("not yet implemented");
         }

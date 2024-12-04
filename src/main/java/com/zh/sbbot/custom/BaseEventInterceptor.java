@@ -5,12 +5,14 @@ import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.Event;
 import com.mikuac.shiro.dto.event.message.MessageEvent;
 import com.zh.sbbot.config.SystemSetting;
+import com.zh.sbbot.util.BotHelper;
 import com.zh.sbbot.util.BotIdHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * 全局事件拦截器
@@ -23,7 +25,31 @@ import java.util.List;
 public class BaseEventInterceptor {
 
     private final BotIdHolder botHolder;
+    private final BotHelper botHelper;
     private final SystemSetting systemSetting;
+
+    /**
+     * 群聊/用户黑名单
+     */
+    private boolean isBlockUserOrGroup(Event event) {
+        JSONObject jsonObject = JSONObject.from(event);
+        Long userId = jsonObject.getLongValue("user_id", 0L);
+        Long groupId = jsonObject.getLongValue("group_id", 0L);
+        return botHelper.isBlock(userId) || botHelper.isBlock(groupId);
+    }
+
+    /**
+     * 消息白名单
+     */
+    private boolean isExclusionMessage(Event event) {
+        if (!(event instanceof MessageEvent msgEvent))
+            return false;
+        final List<String> exclusionMessages = List.of(
+                ".up",
+                ".down"
+        );
+        return List.of(".up", ".down").contains(msgEvent.getRawMessage());
+    }
 
     /**
      * 预处理
@@ -33,9 +59,11 @@ public class BaseEventInterceptor {
      * @return true 为执行 false 为拦截 拦截后不再传递给 plugin
      */
     public boolean preHandle(Bot bot, Event event) {
-        boolean isPass = event instanceof MessageEvent msgEvent ?
-                List.of(".up", ".down").contains(msgEvent.getRawMessage()) || systemSetting.isEnable()
-                : systemSetting.isEnable();
+        // 消息检查
+        Supplier<Boolean> messageCheck = () -> systemSetting.isEnable() || isExclusionMessage(event);
+        // 用户ID和群聊ID检查
+        Supplier<Boolean> userOrGroupCheck = () -> !isBlockUserOrGroup(event);
+        boolean isPass = messageCheck.get() && userOrGroupCheck.get();
         if (isPass) {
             botHolder.setBotId(event.getSelfId());
         }
