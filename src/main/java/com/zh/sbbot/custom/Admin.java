@@ -1,11 +1,11 @@
-package com.zh.sbbot.annotation;
+package com.zh.sbbot.custom;
 
 import com.zh.sbbot.constant.AdminMode;
 
 import java.lang.annotation.*;
 
 /**
- * 标识管理员命令
+ * 标识管理员命令，结合消息事件使用
  */
 @Documented
 @Target({ElementType.METHOD})

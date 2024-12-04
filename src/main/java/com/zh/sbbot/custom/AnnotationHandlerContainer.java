@@ -1,10 +1,9 @@
-package com.zh.sbbot.util;
+package com.zh.sbbot.custom;
 
 import com.mikuac.shiro.annotation.common.Order;
 import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.common.utils.AnnotationScanner;
 import com.mikuac.shiro.model.HandlerMethod;
-import com.zh.sbbot.annotation.Admin;
 import com.zh.sbbot.constant.AdminMode;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
@@ -98,6 +97,7 @@ public class AnnotationHandlerContainer {
             return shiroAnnotations;
         }
         shiroAnnotations = (new AnnotationScanner()).scan("com.mikuac.shiro.annotation");
+        shiroAnnotations.addAll((new AnnotationScanner()).scan("com.zh.sbbot.custom.event.handler"));
         return shiroAnnotations;
     }
 

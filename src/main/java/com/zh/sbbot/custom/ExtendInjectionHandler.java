@@ -4,9 +4,13 @@ import com.mikuac.shiro.common.utils.InternalUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.handler.injection.InjectionHandler;
 import com.mikuac.shiro.model.HandlerMethod;
-import com.zh.sbbot.annotation.GroupMsgEmojiLikeHandler;
-import com.zh.sbbot.model.event.GroupMsgEmojiLikeNoticeEvent;
+import com.zh.sbbot.custom.event.EssenceNoticeEvent;
+import com.zh.sbbot.custom.event.handler.EssenceHandler;
+import com.zh.sbbot.custom.event.handler.GroupMsgEmojiLikeHandler;
+import com.zh.sbbot.custom.event.GroupMsgEmojiLikeNoticeEvent;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +24,10 @@ import java.util.*;
 @Primary
 @Slf4j
 public class ExtendInjectionHandler extends InjectionHandler {
+    @Lazy
+    @Autowired
+    private AnnotationHandlerContainer annotationHandlerContainer;
+
 
     /**
      * 核心逻辑来自于：{@linkplain InjectionHandler}
@@ -45,7 +53,7 @@ public class ExtendInjectionHandler extends InjectionHandler {
      * 核心逻辑来自于：{@linkplain InjectionHandler}
      */
     private <T> void invoke(Bot bot, T event, Class<? extends Annotation> type) {
-        Optional<List<HandlerMethod>> methods = Optional.ofNullable(bot.getAnnotationHandler().get(type));
+        Optional<List<HandlerMethod>> methods = Optional.ofNullable(annotationHandlerContainer.getAnnotationHandler().get(type));
         if (methods.isEmpty()) {
             return;
         }
@@ -60,6 +68,13 @@ public class ExtendInjectionHandler extends InjectionHandler {
      */
     public void invokeGroupMsgEmojiLike(Bot bot, GroupMsgEmojiLikeNoticeEvent event) {
         this.invoke(bot, event, GroupMsgEmojiLikeHandler.class);
+    }
+
+    /**
+     * 拓展事件执行 - 群聊精华消息操作事件
+     */
+    public void invokeGroupMsgEmojiLike(Bot bot, EssenceNoticeEvent event) {
+        this.invoke(bot, event, EssenceHandler.class);
     }
 
 }

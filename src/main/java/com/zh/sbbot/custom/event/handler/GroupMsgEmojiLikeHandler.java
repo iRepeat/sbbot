@@ -1,4 +1,4 @@
-package com.zh.sbbot.annotation;
+package com.zh.sbbot.custom.event.handler;
 
 import java.lang.annotation.*;
 

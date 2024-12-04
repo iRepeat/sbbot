@@ -9,7 +9,7 @@ import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
-import com.zh.sbbot.annotation.Admin;
+import com.zh.sbbot.custom.Admin;
 import com.zh.sbbot.config.QQTTSConfig;
 import com.zh.sbbot.constant.AdminMode;
 import com.zh.sbbot.util.BotHelper;

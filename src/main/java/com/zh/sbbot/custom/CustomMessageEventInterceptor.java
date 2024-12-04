@@ -7,7 +7,6 @@ import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.dto.event.message.MessageEvent;
 import com.zh.sbbot.constant.MemberRole;
 import com.zh.sbbot.repository.AliasRepository;
-import com.zh.sbbot.util.AnnotationHandlerContainer;
 import com.zh.sbbot.util.BotHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

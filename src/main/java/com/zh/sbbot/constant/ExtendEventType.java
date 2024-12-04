@@ -9,5 +9,6 @@ public interface ExtendEventType {
      */
     interface Notice {
         String GROUP_MSG_EMOJI_LIKE = "group_msg_emoji_like";
+        String ESSENCE = "essence";
     }
 }

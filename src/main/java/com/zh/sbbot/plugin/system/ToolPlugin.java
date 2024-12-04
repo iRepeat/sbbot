@@ -12,7 +12,7 @@ import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.mikuac.shiro.enums.MsgTypeEnum;
 import com.mikuac.shiro.model.ArrayMsg;
-import com.zh.sbbot.annotation.Admin;
+import com.zh.sbbot.custom.Admin;
 import com.zh.sbbot.constant.AdminMode;
 import com.zh.sbbot.util.*;
 import lombok.RequiredArgsConstructor;

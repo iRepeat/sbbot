@@ -13,7 +13,7 @@ import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.mikuac.shiro.enums.MsgTypeEnum;
 import com.mikuac.shiro.model.ArrayMsg;
-import com.zh.sbbot.annotation.Admin;
+import com.zh.sbbot.custom.Admin;
 import com.zh.sbbot.constant.DictKey;
 import com.zh.sbbot.plugin.ai.dao.PluginAi;
 import com.zh.sbbot.plugin.ai.dao.PluginAiRepository;

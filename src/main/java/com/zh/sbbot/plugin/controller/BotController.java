@@ -12,7 +12,7 @@ import com.mikuac.shiro.dto.action.response.FriendInfoResp;
 import com.mikuac.shiro.dto.action.response.GroupInfoResp;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.handler.injection.InjectionHandler;
-import com.zh.sbbot.util.AnnotationHandlerContainer;
+import com.zh.sbbot.custom.AnnotationHandlerContainer;
 import com.zh.sbbot.util.BotHelper;
 import com.zh.sbbot.util.BotUtil;
 import lombok.RequiredArgsConstructor;
@@ -95,7 +95,7 @@ public class BotController {
         event.setPostType("message");
         event.setSelfId(bot.getSelfId());
         GroupMessageEvent.GroupSender sender = new GroupMessageEvent.GroupSender();
-        sender.setNickname("by invoker");
+        sender.setNickname("by controller: invoker");
         sender.setSex("unknown");
         sender.setUserId(model.getUser());
         event.setSender(sender);

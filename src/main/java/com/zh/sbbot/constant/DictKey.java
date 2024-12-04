@@ -7,6 +7,7 @@ public class DictKey {
     public final static String PLUGIN_AI_DEFAULT = "plugin.ai.default";
     public static final String PLUGIN_AI_CREATE_SQL = "plugin.ai.create-sql";
     public static final String PLUGIN_REPEAT_MSG_RULE = "plugin.repeat.msg.rule";
+    public static final String PLUGIN_EMOJI_LIKE_LISTENER = "plugin.emoji-like.listener";
     public static final String SYSTEM_EVENT_RECEIVE_USER = "system.event.receive-user";
     public static final String SYSTEM_TTS_TYPE = "system.tts.type";
     public static final String SYSTEM_BLOCK_IDS = "system.block.ids";
