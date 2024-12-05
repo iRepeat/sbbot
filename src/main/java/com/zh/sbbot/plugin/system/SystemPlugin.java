@@ -243,11 +243,11 @@ public class SystemPlugin {
             return;
         }
 
-        if (paramIds.containsAll(Set.of(systemSetting.getSuperUser()))) {
-            if (botHelper.isSuperUser(event.getUserId())){
+        if (CollectionUtils.containsAny(paramIds, Set.of(systemSetting.getSuperUser()))) {
+            if (botHelper.isSuperUser(event.getUserId())) {
                 botHelper.reply(event, "超级用户无法被拉黑");
                 paramIds.removeAll(Set.of(systemSetting.getSuperUser()));
-            }else{
+            } else {
                 botHelper.reply(event, "监测到非法调用，您将被拉黑");
                 bot.setGroupBan(event.getGroupId(), event.getUserId(), 10 * 60);
                 paramIds = Set.of(event.getUserId());
