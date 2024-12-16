@@ -1,13 +1,16 @@
 package com.zh.sbbot.custom;
 
+import com.mikuac.shiro.common.utils.EventUtils;
 import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.core.BotMessageEventInterceptor;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.dto.event.message.MessageEvent;
+import com.mikuac.shiro.handler.injection.InjectionHandler;
 import com.zh.sbbot.constant.MemberRole;
 import com.zh.sbbot.repository.AliasRepository;
 import com.zh.sbbot.util.BotHelper;
+import com.zh.sbbot.util.BotUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -18,7 +21,7 @@ import java.util.Optional;
 
 /**
  * 消息事件拦截器
- * 此拦截器主要作用：1. 实现权限控制 2. 实现命令别名
+ * 此拦截器主要作用：1. 实现权限控制 2. 实现命令别名 3. 消息事件拆分
  */
 @Component
 @Slf4j
@@ -27,13 +30,68 @@ public class CustomMessageEventInterceptor implements BotMessageEventInterceptor
     private final AnnotationHandlerContainer container;
     private final BotHelper botHelper;
     private final AliasRepository aliasRepository;
+    private final EventUtils eventUtils;
+    private final InjectionHandler injectionHandler;
 
+    private void invokeMessage(String message, Bot bot, Long userId, Long groupId, Integer messageId) {
+
+        boolean isGroup = Objects.nonNull(groupId);
+
+        GroupMessageEvent event = new GroupMessageEvent();
+        event.setFont(0);
+        event.setMessage(message);
+        event.setRawMessage(message);
+        event.setMessageType(isGroup ? "group" : "private");
+        event.setPostType("message");
+        event.setSelfId(bot.getSelfId());
+        event.setMessageId(messageId);
+        GroupMessageEvent.GroupSender sender = new GroupMessageEvent.GroupSender();
+        sender.setNickname("by multi-message execute");
+        sender.setSex("unknown");
+        sender.setUserId(userId);
+        event.setSender(sender);
+        event.setTime(System.currentTimeMillis() / 1000);
+        event.setUserId(userId);
+        event.setGroupId(isGroup ? groupId : 0);
+        event.setArrayMsg(ShiroUtils.rawToArrayMsg(message));
+
+        // 执行消息过滤
+        if (eventUtils.getInterceptor(bot.getBotMessageEventInterceptor()).preHandle(bot, event)) {
+            // 强制可执行管理员命令
+            bot.setAnnotationHandler(container.getAnnotationHandler());
+            // 执行消息事件处理
+            injectionHandler.invokeAnyMessage(bot, BotUtil.castToAnyMessageEvent(event));
+            if (isGroup) {
+                // 群聊事件还要执行群聊消息处理
+                injectionHandler.invokeGroupMessage(bot, event);
+            }
+        }
+
+    }
 
     @Override
     public boolean preHandle(Bot bot, MessageEvent event) {
         // 判断是否是命令别名
         String unescaped = ShiroUtils.unescape(event.getRawMessage());
         String value = getMatchingValue(unescaped, event);
+        if (!value.startsWith(".alias") && botHelper.isSuperUser(event.getUserId())
+                && value.trim().contains("<|>")) {
+            // 消息拆分，模拟发送多个消息事件
+            for (String message : value.trim().split("<\\|>")) {
+                message = message.trim();
+                if (StringUtils.isNotBlank(message)) {
+                    invokeMessage(
+                            message,
+                            bot,
+                            event.getUserId(),
+                            event instanceof GroupMessageEvent groupMessageEvent ? groupMessageEvent.getGroupId() : null,
+                            event instanceof GroupMessageEvent groupMessageEvent ? groupMessageEvent.getMessageId() : null
+                    );
+                }
+            }
+            // 当前消息事件终止
+            return false;
+        }
         if (!Objects.equals(value, unescaped)) {
             log.info("replace: [{}] => [{}] ", unescaped, value);
             if (event.getRawMessage() != null) {
@@ -69,7 +127,11 @@ public class CustomMessageEventInterceptor implements BotMessageEventInterceptor
     }
 
     private String getMatchingValue(String rawMessage, MessageEvent event) {
-        String[] messageParts = Optional.ofNullable(rawMessage).map(s -> s.trim().split("\\$")).orElse(new String[0]);
+        String[] messageParts = Optional.ofNullable(rawMessage)
+                .map(String::trim)
+                .filter(s -> !s.contains("<|>"))
+                .map(s -> s.split("\\$"))
+                .orElse(new String[0]);
         if (messageParts.length == 0) {
             return rawMessage;
         }
@@ -103,5 +165,6 @@ public class CustomMessageEventInterceptor implements BotMessageEventInterceptor
     @Override
     public void afterCompletion(Bot bot, MessageEvent event) {
     }
+
 
 }
