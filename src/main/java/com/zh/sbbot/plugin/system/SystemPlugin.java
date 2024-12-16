@@ -8,10 +8,10 @@ import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
-import com.zh.sbbot.custom.Admin;
 import com.zh.sbbot.config.SystemSetting;
 import com.zh.sbbot.constant.AdminMode;
 import com.zh.sbbot.constant.DictKey;
+import com.zh.sbbot.custom.Admin;
 import com.zh.sbbot.repository.AliasRepository;
 import com.zh.sbbot.repository.DictRepository;
 import com.zh.sbbot.util.BotHelper;
@@ -125,7 +125,7 @@ public class SystemPlugin {
                     botHelper.reply(event, "移除(" + key + ")成功！");
                 } else {
                     dictRepository.setOrRemove(key, value);
-                    botHelper.reply(event, "设置成功！" + key + " = " + value);
+                    botHelper.reply(event, "设置成功！key: " + ShiroUtils.escape(key));
                 }
             }
         });
@@ -198,7 +198,7 @@ public class SystemPlugin {
                     botHelper.reply(event, "移除(" + key + ")成功！");
                 } else {
                     aliasRepository.setOrRemove(key, value);
-                    botHelper.reply(event, "别名设置成功！“%s” => “%s”".formatted(key, value));
+                    botHelper.reply(event, "别名设置成功！key: " + ShiroUtils.escape(key));
                 }
             }
         });

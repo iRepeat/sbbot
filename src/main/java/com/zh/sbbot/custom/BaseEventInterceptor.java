@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 
 /**
  * 全局事件拦截器
- * 主要作用：1. 全局开关 2. 存储BotId上下文 3. 记录消息日志
+ * 主要作用：1. 全局开关 2. 存储BotId上下文 3. 记录消息日志 4. 消息/事件/黑白名单拦截
  */
 @Component
 @Slf4j
