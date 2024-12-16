@@ -75,17 +75,19 @@ public class CustomMessageEventInterceptor implements BotMessageEventInterceptor
         String unescaped = ShiroUtils.unescape(event.getRawMessage());
         String value = getMatchingValue(unescaped, event);
         if (!value.startsWith(".alias") && botHelper.isSuperUser(event.getUserId())
-                && value.trim().split("<\\|>").length > 1) {
+                && value.trim().contains("<|>")) {
             // 消息拆分，模拟发送多个消息事件
             for (String message : value.trim().split("<\\|>")) {
                 message = message.trim();
-                invokeMessage(
-                        message,
-                        bot,
-                        event.getUserId(),
-                        event instanceof GroupMessageEvent groupMessageEvent ? groupMessageEvent.getGroupId() : null,
-                        event instanceof GroupMessageEvent groupMessageEvent ? groupMessageEvent.getMessageId() : null
-                );
+                if (StringUtils.isNotBlank(message)) {
+                    invokeMessage(
+                            message,
+                            bot,
+                            event.getUserId(),
+                            event instanceof GroupMessageEvent groupMessageEvent ? groupMessageEvent.getGroupId() : null,
+                            event instanceof GroupMessageEvent groupMessageEvent ? groupMessageEvent.getMessageId() : null
+                    );
+                }
             }
             // 当前消息事件终止
             return false;
@@ -125,7 +127,11 @@ public class CustomMessageEventInterceptor implements BotMessageEventInterceptor
     }
 
     private String getMatchingValue(String rawMessage, MessageEvent event) {
-        String[] messageParts = Optional.ofNullable(rawMessage).map(s -> s.trim().split("\\$")).orElse(new String[0]);
+        String[] messageParts = Optional.ofNullable(rawMessage)
+                .map(String::trim)
+                .filter(s -> !s.contains("<|>"))
+                .map(s -> s.split("\\$"))
+                .orElse(new String[0]);
         if (messageParts.length == 0) {
             return rawMessage;
         }
