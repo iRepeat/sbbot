@@ -1,18 +1,18 @@
 package com.zh.sbbot.plugin.ai;
 
-import com.mikuac.shiro.annotation.GroupMessageHandler;
+import com.mikuac.shiro.annotation.AnyMessageHandler;
 import com.mikuac.shiro.annotation.MessageHandlerFilter;
 import com.mikuac.shiro.annotation.common.Shiro;
 import com.mikuac.shiro.common.utils.ShiroUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.action.common.ActionData;
 import com.mikuac.shiro.dto.action.response.GetMsgResp;
-import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
+import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.mikuac.shiro.enums.MsgTypeEnum;
-import com.zh.sbbot.custom.Admin;
 import com.zh.sbbot.config.QQTTSConfig;
 import com.zh.sbbot.constant.AdminMode;
+import com.zh.sbbot.custom.Admin;
 import com.zh.sbbot.plugin.ai.dao.PluginAi;
 import com.zh.sbbot.plugin.ai.dao.PluginAiRepository;
 import com.zh.sbbot.plugin.ai.handler.AiHandler;
@@ -55,7 +55,7 @@ public class AiPlugin {
     /**
      * 获取用户上下文标识
      */
-    private static @NotNull String getConversationId(GroupMessageEvent event, Bot bot, Long groupId) {
+    private static @NotNull String getConversationId(AnyMessageEvent event, Bot bot, Long groupId) {
         // 当前用户的会话ID
         String conversationId = groupId + "::" + event.getUserId();
 
@@ -75,17 +75,17 @@ public class AiPlugin {
                     .orElseThrow()
                     .getData()
                     .get("qq");
-            conversationId = event.getGroupId() + "::" + qq;
+            conversationId = groupId + "::" + qq;
             log.info("临时切换上下文：{} -> {}", event.getUserId(), qq);
         } catch (Exception ignored) {
         }
         return conversationId;
     }
 
-    @GroupMessageHandler
+    @AnyMessageHandler
     @MessageHandlerFilter(at = AtEnum.NEED)
-    public void generateAnswer(GroupMessageEvent event, Bot bot) {
-        Long groupId = event.getGroupId();
+    public void generateAnswer(AnyMessageEvent event, Bot bot) {
+        Long groupId = event.getGroupId() == null ? event.getUserId() : event.getGroupId();
 
         // 读取当前群组的配置
         PluginAi pluginAi = getAiOption(event, groupId);
@@ -163,7 +163,7 @@ public class AiPlugin {
     /**
      * 读取当前群组AI配置
      */
-    private @Nullable PluginAi getAiOption(GroupMessageEvent event, Long groupId) {
+    private @Nullable PluginAi getAiOption(AnyMessageEvent event, Long groupId) {
         PluginAi pluginAi = pluginAiRepository.findOne(groupId);
         if (pluginAi == null) {
             log.error("AI配置未初始化：{}", groupId);
@@ -172,7 +172,7 @@ public class AiPlugin {
 
         // 群AI已禁用
         if (Objects.equals(pluginAi.getIsDisable(), 1)) {
-            botHelper.reply(event, "AI功能已关闭");
+            log.info("AI功能已关闭");
             return null;
         }
         return pluginAi;
@@ -183,7 +183,7 @@ public class AiPlugin {
      * 1. 对图片进行OCR文本提取
      * 2. 将``包裹的消息内容作为系统命令执行，并替换为执行结果
      */
-    private String parseText(GroupMessageEvent event) {
+    private String parseText(AnyMessageEvent event) {
         String text = getText(event.getArrayMsg());
         Matcher execMatcher = Pattern.compile("`(.*?)`").matcher(text);
 
@@ -203,9 +203,9 @@ public class AiPlugin {
     }
 
     @Admin(mode = AdminMode.GROUP_ADMIN)
-    @GroupMessageHandler
+    @AnyMessageHandler
     @MessageHandlerFilter(startWith = ".ai", at = AtEnum.NOT_NEED)
-    public void manage(GroupMessageEvent event, Matcher matcher) {
+    public void manage(AnyMessageEvent event, Matcher matcher) {
 
         String usage = """
                 Usage:
@@ -225,7 +225,7 @@ public class AiPlugin {
         }
 
         // 群号从事件中获取
-        Long groupId = event.getGroupId();
+        Long groupId = event.getGroupId() == null ? event.getUserId() : event.getGroupId();
 
         String[] split = ShiroUtils.unescape(param).split(" ");
         String action = split[0].toLowerCase();
