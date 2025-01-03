@@ -17,6 +17,9 @@ public class BotIdHolder {
     }
 
     public void setBotId(Long botId) {
+        if (botId == null) {
+            return;
+        }
         this.botId.set(botId);
     }
 

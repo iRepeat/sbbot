@@ -81,9 +81,10 @@ public class BotHelper {
             msgUtils.reply(event.getMessageId());
         }
 
-        // 构建消息内容，根据是否有用户ID来决定是否需要@用户
+        // 构建消息内容，根据是否有用户ID和消息ID来决定是否需要@用户
         msgUtils.text(text);
-        if (!autoEscape && event.getSender().getUserId() != null) {
+        if (!autoEscape && event.getUserId() != null && event.getMessageId() != null
+                && event.getMessageId() > 0 && event.getUserId() > 0) {
             msgUtils.text("\n").at(event.getSender().getUserId());
         }
         String msg = msgUtils.build();
@@ -184,6 +185,7 @@ public class BotHelper {
         params.put("text", text);
         getBot().customRequest(() -> "send_group_ai_record", params);
     }
+
     /**
      * 拓展api-获取AI语音链接
      */

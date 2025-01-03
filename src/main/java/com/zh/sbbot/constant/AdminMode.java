@@ -11,7 +11,7 @@ public enum AdminMode {
      */
     SU,
     /**
-     * 超级用户和群管理员
+     * 超级用户、群主和群管理员
      */
     GROUP_ADMIN,
     /**
