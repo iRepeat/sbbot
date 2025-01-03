@@ -70,8 +70,10 @@ public class AnnotationHandlerContainer {
                         } else {
                             AdminMode mode = method.getDeclaredAnnotationsByType(Admin.class)[0].mode();
                             switch (mode) {
-                                case GROUP_ADMIN ->
-                                        annotationHandlerWithGroupAdmin.add(annotation.annotationType(), handlerMethod);
+                                case GROUP_ADMIN -> {
+                                    annotationHandlerWithGroupAdmin.add(annotation.annotationType(), handlerMethod);
+                                    annotationHandlerWithGroupOwner.add(annotation.annotationType(), handlerMethod);
+                                }
                                 case GROUP_OWNER ->
                                         annotationHandlerWithGroupOwner.add(annotation.annotationType(), handlerMethod);
                             }
