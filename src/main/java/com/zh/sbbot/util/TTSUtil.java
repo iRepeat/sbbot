@@ -1,5 +1,6 @@
 package com.zh.sbbot.util;
 
+import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.zh.sbbot.config.QQTTSConfig;
 import com.zh.sbbot.constant.DictKey;
 import com.zh.sbbot.repository.DictRepository;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.Base64;
+import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -24,19 +26,19 @@ public class TTSUtil {
     /**
      * @return https/http/base64/file协议的音频
      */
-    public String generate(String content) {
+    public String generate(String content, AnyMessageEvent event) {
         String res = null;
         switch (dictRepository.get(DictKey.SYSTEM_TTS_TYPE)) {
-            case "qq" -> res = generateWithQQ(content);
+            case "qq" -> res = generateWithQQ(content, event.getGroupId());
             default -> log.info("not yet implemented");
         }
         return res;
     }
 
-    private String generateWithQQ(String content) {
-        Long groupId = qqConfig.getGroup();
+    private String generateWithQQ(String content, Long groupId) {
+        Long group = Objects.isNull(groupId) ? qqConfig.getGroup() : groupId;
         String character = qqConfig.getCharacter();
-        return botHelper.getAiRecord(groupId, character, content);
+        return botHelper.getAiRecord(group, character, content);
     }
 
 

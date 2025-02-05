@@ -35,7 +35,7 @@ public class VoicePlugin {
     @AnyMessageHandler
     @MessageHandlerFilter(startWith = ".tts", at = AtEnum.NOT_NEED)
     public void tts(Bot bot, AnyMessageEvent event, Matcher matcher) {
-        String voice = ttsUtil.generate(BotUtil.getParam(matcher));
+        String voice = ttsUtil.generate(BotUtil.getParam(matcher), event);
         bot.sendMsg(event, ArrayMsgUtils.builder().voice(voice).build(), false);
     }
 

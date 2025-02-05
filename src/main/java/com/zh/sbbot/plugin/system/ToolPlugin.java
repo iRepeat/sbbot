@@ -125,7 +125,7 @@ public class ToolPlugin {
         }
         // 生成tts并发送
         if (BotUtil.getCommandParam(matcher).equals("tts")) {
-            String voice = ttsUtil.generate(result);
+            String voice = ttsUtil.generate(result, event);
             bot.sendMsg(event, ArrayMsgUtils.builder().voice(voice).build(), false);
             return;
         }
