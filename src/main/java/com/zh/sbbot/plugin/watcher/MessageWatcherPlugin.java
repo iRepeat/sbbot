@@ -13,8 +13,9 @@ import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.enums.AtEnum;
 import com.mikuac.shiro.enums.MsgTypeEnum;
 import com.mikuac.shiro.model.ArrayMsg;
-import com.zh.sbbot.custom.Admin;
+import com.zh.sbbot.constant.AdminMode;
 import com.zh.sbbot.constant.DictKey;
+import com.zh.sbbot.custom.Admin;
 import com.zh.sbbot.plugin.ai.dao.PluginAi;
 import com.zh.sbbot.plugin.ai.dao.PluginAiRepository;
 import com.zh.sbbot.plugin.ai.handler.AiHandler;
@@ -103,7 +104,7 @@ public class MessageWatcherPlugin {
      */
     @Order(-1)
     @AnyMessageHandler
-    @Admin
+    @Admin(mode = AdminMode.GROUP_ADMIN)
     @MessageHandlerFilter(at = AtEnum.NOT_NEED, startWith = StringUtils.EMPTY)
     public void echo(AnyMessageEvent event, Bot bot, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher, 0)).ifPresent(s -> {
