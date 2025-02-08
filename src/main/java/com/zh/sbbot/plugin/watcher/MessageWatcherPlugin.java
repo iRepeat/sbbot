@@ -108,7 +108,7 @@ public class MessageWatcherPlugin {
     @MessageHandlerFilter(at = AtEnum.NOT_NEED, startWith = StringUtils.EMPTY)
     public void echo(AnyMessageEvent event, Bot bot, Matcher matcher) {
         Optional.ofNullable(BotUtil.getParam(matcher, 0)).ifPresent(s -> {
-            String key = event.getMessageType() + event.getUserId() + event.getGroupId();
+            String key = event.getMessageType() + event.getGroupId();
 
             switch (s) {
                 case ".echo plain" -> {
