@@ -102,7 +102,7 @@ public class TaskPlugin {
                             .append("⏳ 下次执行: ").append(taskModel.getNextTime()).append("\n")
                             .append("⚙️ 任务参数: ").append(taskModel.getCmd()).append("\n");
                 });
-                botHelper.reply(event, sb.toString().trim());
+                botHelper.reply(event, sb.toString().trim(), true);
             }
             case "get" -> {
                 String key = BotUtil.getParam(matcher);
@@ -111,7 +111,7 @@ public class TaskPlugin {
                     return;
                 }
                 TaskModel task = taskManager.getSchedulingTask(Long.valueOf(key));
-                botHelper.reply(event, "✨计划任务详情✨\n\n%s".formatted(getTaskDetailDisplay(task)));
+                botHelper.reply(event, "✨计划任务详情✨\n\n%s".formatted(getTaskDetailDisplay(task)), true);
             }
             case "set" -> {
                 String messageParam = BotUtil.getParam(matcher);
@@ -136,7 +136,7 @@ public class TaskPlugin {
 
                 TaskModel task = taskManager.editTask(Long.parseLong(key), fieldKey, fieldValue);
 
-                botHelper.reply(event, "✅操作成功！\n\n%s".formatted(getTaskDetailDisplay(task)));
+                botHelper.reply(event, "✅操作成功！\n\n%s".formatted(getTaskDetailDisplay(task)), true);
             }
             case "reload" -> {
                 int i = taskManager.reload(event.getGroupId());
@@ -167,9 +167,9 @@ public class TaskPlugin {
                 }
                 TaskModel task = taskManager.setTaskStatus(Long.valueOf(key), commandParam);
                 if (commandParam.equals(task.getStatus())) {
-                    botHelper.reply(event, "✅操作成功！\n\n%s".formatted(getTaskDetailDisplay(task)));
+                    botHelper.reply(event, "✅操作成功！\n\n%s".formatted(getTaskDetailDisplay(task)), true);
                 } else {
-                    botHelper.reply(event, "❌任务状态更改失败！\n\n%s".formatted(getTaskDetailDisplay(task)));
+                    botHelper.reply(event, "❌任务状态更改失败！\n\n%s".formatted(getTaskDetailDisplay(task)), true);
                 }
             }
             case "add" -> {
@@ -200,7 +200,7 @@ public class TaskPlugin {
 
                 taskManager.saveSchedulingTask(taskModel);
                 String tip = "✅添加任务成功！\n\n%s".formatted(getTaskDetailDisplay(taskModel));
-                botHelper.reply(event, tip);
+                botHelper.reply(event, tip, true);
             }
 
             default -> {
